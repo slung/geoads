@@ -132,6 +132,6 @@
 	
 	GA.App.States = {};
 	GA.App.States.MAP = 'map';
-	GA.App.States.CONTACT = 'contact';
+	GA.App.States.INFO = 'info';
 	
 }(GA));

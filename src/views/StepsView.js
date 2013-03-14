@@ -19,6 +19,7 @@
 		
 		register: function()
 		{
+			this.onMessage("stateChanged", this.onStateChanged);
 		},
 		
 		render: function()
@@ -34,12 +35,30 @@
 		
 		onNextStepClick: function( evt )
 		{
-			console.log("next");
+			this.sendMessage("changeState", { state: GA.App.States.INFO });
 		},
 		
 		onPreviousStepClick: function( evt )
 		{
-			console.log("previous");
+			this.sendMessage("changeState", { state: GA.App.States.MAP });
+		},
+		
+		/*
+		 * Messages
+		 */
+		onStateChanged: function( msg )
+		{
+			//Hide "Next" button in "INFO" state, hide "Previous" button in "MAP" state
+			if ( msg.currentState == GA.App.States.INFO )
+			{
+				GA.addClass(GA.one( "#next-step", this.container ), "hide");
+				GA.removeClass(GA.one( "#previous-step", this.container ), "hide");
+			}
+			else if ( msg.currentState == GA.App.States.MAP )
+			{
+				GA.addClass(GA.one( "#previous-step", this.container ), "hide");
+				GA.removeClass(GA.one( "#next-step", this.container ), "hide");
+			}
 		}
 	});
 	

@@ -222,7 +222,7 @@
 		
 		register: function()
 		{
-			this.onMessage("showView", this.onShowView);
+			//this.onMessage("showView", this.onShowView);
 		},
 		
 		render: function()
@@ -245,6 +245,8 @@
 			}
 			
 			this.map = new google.maps.Map( this.container, mapOptions );
+			
+			this.drawMarker();
 			
 			return this;
 		},
@@ -338,21 +340,13 @@
 				this.transylvaniaRegion.setMap(this.map);
 			}, this));
 			
-		},
+		}
 		
 		/*
 		 * Messages
 		 */
 		
-		onShowView: function( msg )
-		{
-			if ( msg.id != this.container.id)
-				return;
-				
-			// google.maps.event.trigger(this.map, "resize");
-			
-			this.drawMarker();
-		}
+		
 		
 	});
 	
@@ -473,6 +467,75 @@
 		
 		register: function()
 		{
+			this.onMessage("stateChanged", this.onStateChanged);
+		},
+		
+		render: function()
+		{
+			this.container.innerHTML = this.mustache( this.templates.main, {});
+			
+			return this;
+		},
+		
+		/*
+		 * Events
+		 */
+		
+		onNextStepClick: function( evt )
+		{
+			this.sendMessage("changeState", { state: GA.App.States.INFO });
+		},
+		
+		onPreviousStepClick: function( evt )
+		{
+			this.sendMessage("changeState", { state: GA.App.States.MAP });
+		},
+		
+		/*
+		 * Messages
+		 */
+		onStateChanged: function( msg )
+		{
+			//Hide "Next" button in "INFO" state, hide "Previous" button in "MAP" state
+			if ( msg.currentState == GA.App.States.INFO )
+			{
+				GA.addClass(GA.one( "#next-step", this.container ), "hide");
+				GA.removeClass(GA.one( "#previous-step", this.container ), "hide");
+			}
+			else if ( msg.currentState == GA.App.States.MAP )
+			{
+				GA.addClass(GA.one( "#previous-step", this.container ), "hide");
+				GA.removeClass(GA.one( "#next-step", this.container ), "hide");
+			}
+		}
+	});
+	
+	// Publish
+	GA.StepsView = StepsView;
+	
+}(GA));
+
+(function( GA )
+{
+	var InfoView = GA.View.extend({
+		
+		events: {
+			"#next-step":{
+				click: "onNextStepClick"
+			},
+			"#previous-step":{
+				click: "onPreviousStepClick"
+			}
+		},
+		
+		init: function( cfg ) {
+			
+			// Call super
+			this._parent( cfg );
+		},
+		
+		register: function()
+		{
 		},
 		
 		render: function()
@@ -498,7 +561,7 @@
 	});
 	
 	// Publish
-	GA.StepsView = StepsView;
+	GA.InfoView = InfoView;
 	
 }(GA));
 
@@ -636,7 +699,7 @@
 	
 	GA.App.States = {};
 	GA.App.States.MAP = 'map';
-	GA.App.States.CONTACT = 'contact';
+	GA.App.States.INFO = 'info';
 	
 }(GA));
 

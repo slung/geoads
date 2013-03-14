@@ -27,7 +27,7 @@
 		
 		register: function()
 		{
-			this.onMessage("showView", this.onShowView);
+			//this.onMessage("showView", this.onShowView);
 		},
 		
 		render: function()
@@ -50,6 +50,8 @@
 			}
 			
 			this.map = new google.maps.Map( this.container, mapOptions );
+			
+			this.drawMarker();
 			
 			return this;
 		},
@@ -143,21 +145,13 @@
 				this.transylvaniaRegion.setMap(this.map);
 			}, this));
 			
-		},
+		}
 		
 		/*
 		 * Messages
 		 */
 		
-		onShowView: function( msg )
-		{
-			if ( msg.id != this.container.id)
-				return;
-				
-			// google.maps.event.trigger(this.map, "resize");
-			
-			this.drawMarker();
-		}
+		
 		
 	});
 	

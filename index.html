@@ -1,13 +1,17 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>GeoAds</title>
+		<title>GeoAds - the power of Where</title>
+		
+		<!-- Icon -->
+		<link rel="icon" href="images/favicon.ico" />
 		
 		<!-- Style -->
 		<link rel="stylesheet" type="text/css" href="style/main.css">
 	    <link rel="stylesheet" type="text/css" href="style/grids-min.css">
 	    <link rel="stylesheet" type="text/css" href="style/cssreset-min.css">
-	    <link rel="stylesheet" type="text/css" href="style/jquery-ui.css" />
+	    <link rel="stylesheet" type="text/css" href="style/bootstrap.css">
+	    <link rel="stylesheet" type="text/css" href="style/flat-ui.css">
 	    
 		<!-- Font -->
 	    <link href='http://fonts.googleapis.com/css?family=Alfa+Slab+One' rel='stylesheet' type='text/css'>
@@ -15,9 +19,15 @@
 		<!-- Google Maps -->
     	<script type="text/javascript" src="http://maps.google.com/maps/api/js?v=3.3&sensor=false&language=en"></script>
 	    
+	    <script type="text/javascript" src="libs/jquery-1.8.2.min.js"></script>
+	    <script type="text/javascript" src="libs/jquery-ui-1.10.0.custom.min.js"></script>
+	    <script type="text/javascript" src="libs/jquery.dropkick-1.0.0.js"></script>
+	    <script type="text/javascript" src="libs/jquery.tagsinput.js"></script>
+	    <script type="text/javascript" src="libs/bootstrap-tooltip.js"></script>
+	    <script type="text/javascript" src="libs/jquery.placeholder.js"></script>
+	    <script type="text/javascript" src="libs/application.js"></script>
+	    
 		<script type="text/javascript" src="libs/js.class.js"></script>
-		<script type="text/javascript" src="libs/jquery-1.7.2.min.js"></script>
-		<script type="text/javascript" src="libs/jquery-ui.js"></script>
 		<script type="text/javascript" src="libs/geoads.jquery.js"></script>
 		<script type="text/javascript" src="libs/geoads.js"></script>
 		<script type="text/javascript" src="libs/mustache.js"></script>
@@ -42,7 +52,7 @@
 							new GA.MenuView({
 								container: GA.one("#menu"),
 								templates: {
-									main: $j.trim( GA.one("#menu-tpl").innerHTML ),
+									main: $j.trim( GA.one("#menu-tpl").innerHTML )
 								}
 							}),
 							
@@ -52,7 +62,7 @@
 							new GA.StepsView({
 								container: GA.one("#steps"),
 								templates: {
-									main: $j.trim( GA.one("#steps-tpl").innerHTML ),
+									main: $j.trim( GA.one("#steps-tpl").innerHTML )
 								}
 							}),
 							
@@ -61,8 +71,26 @@
 							 */
 							new GA.MapView({
 								container: GA.one("#map"),
-								hideOnStates: [],
+								hideOnStates: [ GA.App.States.INFO ],
+								markerInfo:{
+									url: "images/grey-blue-pin-48.png",
+									position: { 
+										lat: 45.757284,
+										lng: 21.228633
+									}
+								},
 								templates: {
+								}	
+							}),
+							
+							/*
+							 * Info View
+							 */
+							new GA.InfoView({
+								container: GA.one("#info"),
+								hideOnStates: [ GA.App.States.MAP ],
+								templates: {
+									main: $j.trim( GA.one("#info-tpl").innerHTML )
 								}	
 							})
 						]
@@ -82,11 +110,7 @@
 			<div id="menu"></div>
 			<div id="steps"></div>
 			<div id="map"></div>
-			<!-- <div class="footer">
-				<div class="inner">
-					<p>&copy;GeoAds</p>
-				</div>
-			</div> -->
+			<div id="info"></div>
 		</div>
 		
 		
@@ -102,8 +126,23 @@
 		<!-- Steps View -->
 		<script id="steps-tpl" type="text/template">
 			<div id="steps-container">
-				<div id="previous-step" class="yui3-u" title="Previous Step"></div>
+				<div id="previous-step" class="yui3-u hide" title="Previous Step"></div>
 				<div id="next-step" class="yui3-u" title="Next Step"></div>
+			</div>
+		</script>
+		
+		<!-- Info View -->
+		<script id="info-tpl" type="text/template">
+			<div class="left">
+				<h3>Congrats!</h3>
+				<p>You're almost done adding you business ON THE MAP!</p>
+				<p>Please take on more minute and complete your business information. This is the information the users will see when they're in the neighbourhood.</p>
+			</div>
+			<div class="right">
+				<input id="company-name" type="text" placeholder="Company name (visible to users)"/>
+				
+				<h4>Add keywords to describe your company (will be visible to users)</h4>
+				<input name="tagsinput" id="tagsinput" class="tagsinput" value="ceva">
 			</div>
 		</script>
 		

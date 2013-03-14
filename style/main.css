@@ -62,7 +62,7 @@ body
 {
 	position: absolute;
 	top: 50px;
-	left: 0;
+	left: 36px;
 	right: 0;
 	height: 40px;
 	
@@ -83,6 +83,58 @@ body
 	height: 32px;
 	background: url('../images/right-arrow.png');
 	cursor: pointer;
+}
+
+/*
+ * Info
+ */
+
+#info
+{
+	position: absolute;
+	top: 90px;
+	left: 0;
+	right: 0;
+	bottom: 0;
+}
+
+#info #company-name
+{
+	width: 400px;
+}
+
+#info input:focus
+{
+	border-color: #00A4E4;
+}
+
+#info .left
+{
+	position: absolute;
+	top: 90px;
+	left: 0;
+	bottom: 0;
+	width: 300px;
+	padding: 0px 0px 0px 30px;
+}
+
+#info .right
+{
+	position: absolute;
+	top: 136px;
+	left: 400px;
+	bottom: 0;
+	width: 400px;
+}
+
+#info .right .tagsinput
+{
+	border: 2px solid #00A4E4;
+}
+
+#info .right .tagsinput-add:hover
+{
+	background-color: #00A4E4;
 }
 
 /*
