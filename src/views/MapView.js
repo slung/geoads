@@ -112,40 +112,9 @@
 			
 			//Render			
 			this.adCoverage.setMap(this.map);
+			google.maps.event.trigger(this.map, "resize");
 		},
-		
-		/*
-		 * Draws a region on Google Map
-		 * The region param represents an array og LatLng objects defining the polygon
-		 */
-		drawRegion: function( region )
-		{
-			var regionCenter = new google.maps.LatLng(46.16, 24.13);
-			var regionRadius = 150000;
-			
-			this.transylvaniaRegion = new google.maps.Circle({
-				center: regionCenter,
-				radius: regionRadius,
-				strokeColor: "#81B23C",
-			    strokeOpacity: 0.8,
-			    strokeWeight: 2,
-			    fillColor: "#81B23C",
-			    fillOpacity: 0.2	
-			});
-			
-			this.transylvaniaRegion.setMap(this.map);
-			
-			google.maps.event.addListener(this.transylvaniaRegion, 'mouseover', GA.bind(function(){
-				this.transylvaniaRegion.strokeWeight = 5;
-				this.transylvaniaRegion.setMap(this.map);
-			}, this));
-			
-			google.maps.event.addListener(this.transylvaniaRegion, 'mouseout', GA.bind(function(){
-				this.transylvaniaRegion.strokeWeight = 2;
-				this.transylvaniaRegion.setMap(this.map);
-			}, this));
-			
-		}
+
 		
 		/*
 		 * Messages

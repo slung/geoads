@@ -33,7 +33,8 @@ body
 	right: 0;
 	height: 50px;
 	
-	background-color: #00A4E4;
+/*	background-color: #00A4E4;*/
+	background: url('../images/header-bg.png') repeat-x;
 }
 
 .page #menu .logo
@@ -58,31 +59,44 @@ body
  * Steps
  */
 
-#steps
-{
-	position: absolute;
-	top: 50px;
-	left: 36px;
-	right: 0;
-	height: 40px;
-	
-	background-color: white;
-}
-
 #steps #previous-step
 {
-	width: 32px;
-	height: 32px;
-	background: url('../images/left-arrow.png');
+	position: absolute;
+	left: 20px;
+	top: 345px;
+	
+	z-index: 5000;
+	
+	width: 96px;
+	height: 96px;
+	background: url('../images/left-arrow-96.png');
 	cursor: pointer;
+	opacity: 0.7;
+}
+
+#steps #previous-step:hover
+{
+	opacity: 1;
 }
 
 #steps #next-step
 {
-	width: 32px;
-	height: 32px;
-	background: url('../images/right-arrow.png');
+	position: absolute;
+	right: 20px;
+	top: 345px;
+	
+	z-index: 5000;
+	
+	width: 96px;
+	height: 96px;
+	background: url('../images/right-arrow-96.png');
 	cursor: pointer;
+	opacity: 0.7;
+}
+
+#steps #next-step:hover
+{
+	opacity: 1;
 }
 
 /*
@@ -93,14 +107,14 @@ body
 {
 	position: absolute;
 	top: 90px;
-	left: 0;
+	left: 30px;
 	right: 0;
 	bottom: 0;
 }
 
-#info #company-name
+#info input
 {
-	width: 400px;
+	width: 365px;
 }
 
 #info input:focus
@@ -112,9 +126,9 @@ body
 {
 	position: absolute;
 	top: 90px;
-	left: 0;
+	left: 30px;
 	bottom: 0;
-	width: 300px;
+	width: 365px;
 	padding: 0px 0px 0px 30px;
 }
 
@@ -122,9 +136,9 @@ body
 {
 	position: absolute;
 	top: 136px;
-	left: 400px;
+	left: 430px;
 	bottom: 0;
-	width: 400px;
+	width: 380px;
 }
 
 #info .right .tagsinput
@@ -144,7 +158,7 @@ body
 #map
 {
 	position: absolute;
-	top: 90px;
+	top: 50px;
 	left: 0;
 	right: 0;
 	bottom: 0;
