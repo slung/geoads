@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>GeoAds</title>
+		
+		<!-- Style -->
+		<link rel="stylesheet" type="text/css" href="style/main.css">
+	    <link rel="stylesheet" type="text/css" href="style/grids-min.css">
+	    <link rel="stylesheet" type="text/css" href="style/cssreset-min.css">
+	    <link rel="stylesheet" type="text/css" href="style/jquery-ui.css" />
+	    
+		<!-- Font -->
+	    <link href='http://fonts.googleapis.com/css?family=Alfa+Slab+One' rel='stylesheet' type='text/css'>
+		
+		<!-- Google Maps -->
+    	<script type="text/javascript" src="http://maps.google.com/maps/api/js?v=3.3&sensor=false&language=en"></script>
+	    
+		<script type="text/javascript" src="libs/js.class.js"></script>
+		<script type="text/javascript" src="libs/jquery-1.7.2.min.js"></script>
+		<script type="text/javascript" src="libs/jquery-ui.js"></script>
+		<script type="text/javascript" src="libs/geoads.jquery.js"></script>
+		<script type="text/javascript" src="libs/geoads.js"></script>
+		<script type="text/javascript" src="libs/mustache.js"></script>
+		<script type="text/javascript" src="libs/jsonp.js"></script>
+		<script type="text/javascript" src="libs/helpers.js"></script>
+		
+		<!-- Script -->
+		<script>
+	
+			(function( $j )
+			{
+				$j(document).ready( function(){
+					
+					/** App **/
+					var app = new GA.App({
+						state: GA.App.States.MAP,
+						views: [
+						
+							/*
+							 * Menu View
+							 */
+							new GA.MenuView({
+								container: GA.one("#menu"),
+								templates: {
+									main: $j.trim( GA.one("#menu-tpl").innerHTML ),
+								}
+							}),
+							
+							/*
+							 * Steps View
+							 */
+							new GA.StepsView({
+								container: GA.one("#steps"),
+								templates: {
+									main: $j.trim( GA.one("#steps-tpl").innerHTML ),
+								}
+							}),
+							
+							/*
+							 * Map View
+							 */
+							new GA.MapView({
+								container: GA.one("#map"),
+								hideOnStates: [],
+								templates: {
+								}	
+							})
+						]
+					});
+	
+					app.start();
+				});
+				
+			})(jQuery.noConflict());
+			
+		</script>	
+		
+	</head>
+	<body>
+		
+		<div class="page">
+			<div id="menu"></div>
+			<div id="steps"></div>
+			<div id="map"></div>
+			<!-- <div class="footer">
+				<div class="inner">
+					<p>&copy;GeoAds</p>
+				</div>
+			</div> -->
+		</div>
+		
+		
+		<!-- Templates -->
+		
+		<!-- Menu View -->
+		<script id="menu-tpl" type="text/template">
+			<div class="menu-container">
+				<div id="home" class="yui3-u logo">GeoAds</div>
+			</div>
+		</script>
+		
+		<!-- Steps View -->
+		<script id="steps-tpl" type="text/template">
+			<div id="steps-container">
+				<div id="previous-step" class="yui3-u" title="Previous Step"></div>
+				<div id="next-step" class="yui3-u" title="Next Step"></div>
+			</div>
+		</script>
+		
+	</body>
+</html>
