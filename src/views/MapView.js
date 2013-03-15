@@ -6,7 +6,9 @@
 		maxRadius: 2000,
 		
 		events: {
-			
+			"#next-step":{
+				click: "onNextStepClick"
+			}
 		},
 		
 		init: function( cfg ) {
@@ -57,7 +59,7 @@
 			    },
 			}
 			
-			this.map = new google.maps.Map( this.container, mapOptions );
+			this.map = new google.maps.Map( this.renderContainer, mapOptions );
 			
 			return this;
 		},
@@ -195,7 +197,12 @@
 			markerInfo.position.lng = msg.lon;
 			
 			this.drawMarker( markerInfo );
-		}
+		},
+		
+		onNextStepClick: function( evt )
+		{
+			this.sendMessage("changeState", { state: GA.App.States.INFO });
+		},
 	});
 	
 	// Publish

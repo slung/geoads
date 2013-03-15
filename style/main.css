@@ -56,50 +56,6 @@ body
 }
 
 /*
- * Steps
- */
-
-#steps #previous-step
-{
-	position: absolute;
-	left: 20px;
-	top: 345px;
-	
-	z-index: 5000;
-	
-	width: 96px;
-	height: 96px;
-	background: url('../images/left-arrow-96.png');
-	cursor: pointer;
-	opacity: 0.7;
-}
-
-#steps #previous-step:hover
-{
-	opacity: 1;
-}
-
-#steps #next-step
-{
-	position: absolute;
-	right: 20px;
-	top: 345px;
-	
-	z-index: 5000;
-	
-	width: 96px;
-	height: 96px;
-	background: url('../images/right-arrow-96.png');
-	cursor: pointer;
-	opacity: 0.7;
-}
-
-#steps #next-step:hover
-{
-	opacity: 1;
-}
-
-/*
  * Search
  */
 
@@ -165,6 +121,26 @@ body
 	border-color: #00A4E4;
 }
 
+#info #previous-step
+{
+	position: absolute;
+	left: 20px;
+	top: 50%;
+	
+	z-index: 5000;
+	
+	width: 96px;
+	height: 96px;
+	background: url('../images/left-arrow-96.png');
+	cursor: pointer;
+	opacity: 0.7;
+}
+
+#info #previous-step:hover
+{
+	opacity: 1;
+}
+
 #info .left
 {
 	position: absolute;
@@ -198,13 +174,33 @@ body
  * Map
  */
 
-#map
+#map-container
 {
 	position: absolute;
 	top: 50px;
 	left: 0;
 	right: 0;
 	bottom: 0;
+}
+
+#map #next-step
+{
+	position: absolute;
+	right: 20px;
+	top: 50%;
+	
+	z-index: 5000;
+	
+	width: 96px;
+	height: 96px;
+	background: url('../images/right-arrow-96.png');
+	cursor: pointer;
+	opacity: 0.7;
+}
+
+#map #next-step:hover
+{
+	opacity: 1;
 }
 
 /*

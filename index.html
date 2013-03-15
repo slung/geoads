@@ -62,20 +62,11 @@
 							}),
 							
 							/*
-							 * Steps View
-							 */
-							new GA.StepsView({
-								container: GA.one("#steps"),
-								templates: {
-									main: $j.trim( GA.one("#steps-tpl").innerHTML )
-								}
-							}),
-							
-							/*
 							 * Map View
 							 */
 							new GA.MapView({
 								container: GA.one("#map"),
+								renderContainer: GA.one("#map-container"),
 								hideOnStates: [ GA.App.States.INFO ],
 								zoom: 17,
 								markerInfo:{
@@ -119,7 +110,10 @@
 			<div id="menu"></div>
 			<div id="steps"></div>
 			<div id="search"></div>
-			<div id="map"></div>
+			<div id="map">
+				<div id="next-step" class="yui3-u" title="Next Step"></div>
+				<div id="map-container"></div>
+			</div>
 			<div id="info"></div>
 		</div>
 		
@@ -132,14 +126,6 @@
 			</div>
 		</script>
 		
-		<!-- Steps View -->
-		<script id="steps-tpl" type="text/template">
-			<div id="steps-container">
-				<div id="previous-step" class="yui3-u hide" title="Previous Step"></div>
-				<div id="next-step" class="yui3-u" title="Next Step"></div>
-			</div>
-		</script>
-		
 		<!-- Search View -->
 		<script id="search-tpl" type="text/template">
 			<div id="search-btn" class="yui3-u" title="Search for my location"></div>
@@ -148,6 +134,7 @@
 		
 		<!-- Info View -->
 		<script id="info-tpl" type="text/template">
+			<div id="previous-step" class="yui3-u" title="Previous Step"></div>
 			<div class="left">
 				<h3>Congrats!</h3>
 				<p>You're almost done adding you business ON THE MAP!</p>

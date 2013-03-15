@@ -12,9 +12,11 @@
 			
 			this.templates = cfg.templates;
 			this.container = cfg.container;
+			this.renderContainer = cfg.renderContainer;
 			this.hideOnStates = cfg.hideOnStates || [];
 			this.formatRenderData = cfg.formatRenderData;
 			this.dataManager = GA.DataManager.getInstance();
+			this.adManager = GA.AdManager.getInstance();
 			
 			this.events = GA.extend( this.events || {}, cfg.events || {} );
 			

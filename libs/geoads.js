@@ -256,6 +256,51 @@
 
 (function( GA )
 {
+	// Singleton instance
+	var adManager = null;
+	var AdManager = new Class({
+		
+		ad: null,
+		
+		init: function()
+		{
+			
+		},
+		
+		setAd: function( adCenter, adRadius, adName, adDescripton )
+		{
+			if ( !adCenter || !adRadius || !adName || !addDescription )
+				return;
+			
+			this.ad = {};
+			this.ad.center = adCenter;
+			this.ad.radius = adRadius;
+			this.ad.name = adName;
+			this.ad.description = adDescripton;
+		},
+		
+		getAd: function()
+		{
+			return this.ad;
+		}
+	});	
+
+	AdManager.getInstance = function()
+	{
+		if( adManager )
+			return adManager;
+		
+		adManager = new AdManager();
+		return adManager;
+	};
+	
+	// Publish
+	GA.AdManager = AdManager;
+	
+}(GA));
+
+(function( GA )
+{
 	var View = GA.MsgManager.extend({
 		
 		app: null,
@@ -268,9 +313,11 @@
 			
 			this.templates = cfg.templates;
 			this.container = cfg.container;
+			this.renderContainer = cfg.renderContainer;
 			this.hideOnStates = cfg.hideOnStates || [];
 			this.formatRenderData = cfg.formatRenderData;
 			this.dataManager = GA.DataManager.getInstance();
+			this.adManager = GA.AdManager.getInstance();
 			
 			this.events = GA.extend( this.events || {}, cfg.events || {} );
 			
@@ -317,7 +364,9 @@
 		maxRadius: 2000,
 		
 		events: {
-			
+			"#next-step":{
+				click: "onNextStepClick"
+			}
 		},
 		
 		init: function( cfg ) {
@@ -368,7 +417,7 @@
 			    },
 			}
 			
-			this.map = new google.maps.Map( this.container, mapOptions );
+			this.map = new google.maps.Map( this.renderContainer, mapOptions );
 			
 			return this;
 		},
@@ -506,7 +555,12 @@
 			markerInfo.position.lng = msg.lon;
 			
 			this.drawMarker( markerInfo );
-		}
+		},
+		
+		onNextStepClick: function( evt )
+		{
+			this.sendMessage("changeState", { state: GA.App.States.INFO });
+		},
 	});
 	
 	// Publish
@@ -602,75 +656,6 @@
 	
 	// Publish
 	GA.MenuView = MenuView;
-	
-}(GA));
-
-(function( GA )
-{
-	var StepsView = GA.View.extend({
-		
-		events: {
-			"#next-step":{
-				click: "onNextStepClick"
-			},
-			"#previous-step":{
-				click: "onPreviousStepClick"
-			}
-		},
-		
-		init: function( cfg ) {
-			
-			// Call super
-			this._parent( cfg );
-		},
-		
-		register: function()
-		{
-			this.onMessage("stateChanged", this.onStateChanged);
-		},
-		
-		render: function()
-		{
-			this.container.innerHTML = this.mustache( this.templates.main, {});
-			
-			return this;
-		},
-		
-		/*
-		 * Events
-		 */
-		
-		onNextStepClick: function( evt )
-		{
-			this.sendMessage("changeState", { state: GA.App.States.INFO });
-		},
-		
-		onPreviousStepClick: function( evt )
-		{
-			this.sendMessage("changeState", { state: GA.App.States.MAP });
-		},
-		
-		/*
-		 * Messages
-		 */
-		onStateChanged: function( msg )
-		{
-			//Hide "Next" button in "INFO" state, hide "Previous" button in "MAP" state
-			if ( msg.currentState == GA.App.States.INFO )
-			{
-				GA.addClass(GA.one( "#next-step", this.container ), "hide");
-				GA.removeClass(GA.one( "#previous-step", this.container ), "hide");
-			}
-			else if ( msg.currentState == GA.App.States.MAP )
-			{
-				GA.addClass(GA.one( "#previous-step", this.container ), "hide");
-				GA.removeClass(GA.one( "#next-step", this.container ), "hide");
-			}
-		}
-	});
-	
-	// Publish
-	GA.StepsView = StepsView;
 	
 }(GA));
 
@@ -791,9 +776,6 @@
 	var InfoView = GA.View.extend({
 		
 		events: {
-			"#next-step":{
-				click: "onNextStepClick"
-			},
 			"#previous-step":{
 				click: "onPreviousStepClick"
 			}
@@ -819,16 +801,10 @@
 		/*
 		 * Events
 		 */
-		
-		onNextStepClick: function( evt )
-		{
-			console.log("next");
-		},
-		
 		onPreviousStepClick: function( evt )
 		{
-			console.log("previous");
-		}
+			this.sendMessage("changeState", { state: GA.App.States.MAP });
+		},
 	});
 	
 	// Publish

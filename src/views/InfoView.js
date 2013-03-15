@@ -3,9 +3,6 @@
 	var InfoView = GA.View.extend({
 		
 		events: {
-			"#next-step":{
-				click: "onNextStepClick"
-			},
 			"#previous-step":{
 				click: "onPreviousStepClick"
 			}
@@ -31,16 +28,10 @@
 		/*
 		 * Events
 		 */
-		
-		onNextStepClick: function( evt )
-		{
-			console.log("next");
-		},
-		
 		onPreviousStepClick: function( evt )
 		{
-			console.log("previous");
-		}
+			this.sendMessage("changeState", { state: GA.App.States.MAP });
+		},
 	});
 	
 	// Publish
