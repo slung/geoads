@@ -120,6 +120,122 @@
 				throw new Error('You can only create one instance of DataManager!');
 			
 			this._parent();
+		},
+		
+		geocode: function( address, multipleResults, options )
+		{
+			var options = options || {};
+		    
+			var geocoder = new google.maps.Geocoder();
+		    
+		    geocoder.geocode({ address: address }, GA.bind( function( results, status ) {
+		    	
+		    	if (status == google.maps.GeocoderStatus.OK) {
+		    		
+		    		if( multipleResults )
+		    		{
+		    			var addresses = [];
+		    			var index = -1;
+		    			
+		    			for( var i=0; i<results.length;i++)
+		    			{
+							index++;
+							
+							addresses.push({
+		    					index: index,
+		    					lat: results[i].geometry.location.lat(),
+		    					lon: results[i].geometry.location.lng(),
+		    					address: results[i].formatted_address,
+		    					bounds: [ 	results[i].geometry.viewport.getSouthWest().lat(), 
+											results[i].geometry.viewport.getSouthWest().lng(),
+											results[i].geometry.viewport.getNorthEast().lat(),
+											results[i].geometry.viewport.getNorthEast().lng() ]
+		    				});
+		    				
+		    			}
+		    			
+		    			if( options.success )
+			    			options.success.apply( this, [addresses]);
+		    		} 
+		    		else
+		    		{
+		    			var lat = results[0].geometry.location.lat();
+			    		var lon = results[0].geometry.location.lng();
+			    		var formatted_address = results[0].formatted_address;
+			    		var bounds = [ 	results[0].geometry.viewport.getSouthWest().lat(), 
+										results[0].geometry.viewport.getSouthWest().lng(),
+										results[0].geometry.viewport.getNorthEast().lat(),
+										results[0].geometry.viewport.getNorthEast().lng() ];
+			    		
+			    		if( options.success )
+			    			options.success.apply( this, [lat, lon, formatted_address, bounds]);
+		    		}
+		    	}
+		    }, this));
+		},
+		
+		reverseGeocode: function (lat, lng, options)
+		{
+			var options = options || {};
+		    
+			var geocoder = new google.maps.Geocoder();
+		    var latLng = new google.maps.LatLng(lat, lng);
+		    
+		    geocoder.geocode({latLng: latLng}, GA.bind( function( results, status ) {
+		    	
+		    	if (status == google.maps.GeocoderStatus.OK) {
+		    		
+		    		var address = results[0].formatted_address;
+		    		var bounds = results[0].geometry.viewport;
+		    		
+		    		if( options.success )
+		    			options.success.apply( this, [address, bounds]);
+		    	}
+		    }, this));
+		},
+		
+		/**
+		 * Geolocates user and the using lat/lon makes a revers geocoding to
+		 * get his address name. 
+		 */
+		geolocateUser: function()
+		{
+			if(navigator.geolocation)
+			{
+				navigator.geolocation.getCurrentPosition( 
+					GA.bind( function( pos ) 
+					{
+						this.reverseGeocode(
+					  		pos.coords.latitude, 
+					  		pos.coords.longitude, 
+					  		{
+					  			success: GA.bind( function( address, googleBounds ) {
+					  				
+					  				this.geocodeBounds = [ 	googleBounds.getSouthWest().lat(), 
+															googleBounds.getSouthWest().lng(),
+															googleBounds.getNorthEast().lat(),
+															googleBounds.getNorthEast().lng() ];
+															
+									this.geocodeCenter = [pos.coords.latitude, pos.coords.longitude];
+									
+									var msg = {
+										lat: pos.coords.latitude,
+										lon: pos.coords.longitude,
+										address: address,
+										bounds: this.geocodeBounds
+									};
+
+									this.fire('userGeocoded', msg);
+									
+					  			}, this )
+					  		}
+					  	);
+					}, this), 
+					GA.bind( function( error ) {
+						this.fire('userNotGeocoded');
+					}, this)
+				);
+			}
 		}
 		
 	});
@@ -198,6 +314,7 @@
 	var MapView = GA.View.extend({
 		
 		map: null,
+		maxRadius: 2000,
 		
 		events: {
 			
@@ -208,6 +325,8 @@
 			// Call super
 			this._parent( cfg );
 			
+			this.dataManager.on('userGeocoded', GA.bind( this.onUserGeocoded, this));
+			
 			this.markerInfo = cfg.markerInfo || {
 				url: "images/orange-pin.png",
 				position: { 
@@ -216,20 +335,24 @@
 				}
 			};
 			
-			this.radius = cfg.radius || 1000;
-			this.zoom = cfg.zoom || 15;
+			this.radius = cfg.radius || 100;
+			
+			if ( this.radius > this.maxRadius )
+				this.radius = this.maxRadius;
+			
+			this.startZoom = cfg.startZoom || 3;
 		},
 		
 		register: function()
 		{
-			//this.onMessage("showView", this.onShowView);
+			this.onMessage("drawMarker", this.onDrawMarker);
 		},
 		
 		render: function()
 		{
 			var mapOptions = 
 			{
-				zoom: this.zoom,
+				zoom: this.startZoom,
 				center: new google.maps.LatLng(this.markerInfo.position.lat, this.markerInfo.position.lng),
 				mapTypeId: google.maps.MapTypeId.ROADMAP,
 				mapTypeControl: true,
@@ -237,8 +360,9 @@
 			        style: google.maps.MapTypeControlStyle.DEFAULT,
 			        position: google.maps.ControlPosition.TOP_RIGHT
 			    },
-			    panControl: true,
-			    zoomControl: true,
+			    panControl: false,
+			    zoomControl: false,
+			    streetViewControl: false,
 			    zoomControlOptions: {
 			        style: google.maps.ZoomControlStyle.SMALL
 			    },
@@ -246,26 +370,44 @@
 			
 			this.map = new google.maps.Map( this.container, mapOptions );
 			
-			this.drawMarker();
-			
 			return this;
+		},
+		
+		centerAndZoom: function( center, zoom )
+		{
+			if ( !center || !center.lat || !center.lon || !zoom)
+				return;
+				
+			var center = new google.maps.LatLng( center.lat, center.lon );
+			
+			this.map.setCenter( center );
+			this.map.setZoom( zoom );
 		},
 		
 		/*
 		 * Draws the draggable location marker
 		 */
-		drawMarker: function()
+		drawMarker: function( markerInfo )
 		{
+			this.markerInfo = markerInfo || this.markerInfo; 
+			
 			if ( !this.markerInfo )
 				return;
-				
-			this.marker = new google.maps.Marker({
-				map: this.map,
-				animation: google.maps.Animation.DROP,
-				draggable: true,
-				icon: this.markerInfo.url,
-				position: new google.maps.LatLng( this.markerInfo.position.lat, this.markerInfo.position.lng )
-			});
+			
+			if ( !this.marker )
+			{
+				this.createMarker( this.markerInfo );
+			}
+			else
+			{
+				this.marker.setPosition( new google.maps.LatLng( this.markerInfo.position.lat, this.markerInfo.position.lng ) );
+			}
+			
+			//Center and zoom map
+			this.centerAndZoom( {
+				lat: this.markerInfo.position.lat,
+				lon: this.markerInfo.position.lng
+			}, 17 ); 
 			
 			this.drawCoverage();
 			
@@ -281,6 +423,17 @@
 			google.maps.event.addListener(this.marker, "dragend", GA.bind(function(){
 				this.drawCoverage();
 			}, this));
+		},
+		
+		createMarker: function( markerInfo )
+		{
+			this.marker = new google.maps.Marker({
+				map: this.map,
+				animation: google.maps.Animation.DROP,
+				draggable: true,
+				icon: markerInfo.url,
+				position: new google.maps.LatLng( markerInfo.position.lat, markerInfo.position.lng )
+			});
 		},
 		
 		drawCoverage: function()
@@ -305,49 +458,55 @@
 				this.adCoverage.setCenter( center );
 			}
 			
+			google.maps.event.addListener(this.adCoverage, "radius_changed", GA.bind(function( evt ){
+				
+				if ( this.adCoverage.radius > this.maxRadius )
+				{
+					this.adCoverage.setRadius( this.maxRadius );
+					
+					//@ToDO: Should show a message to the user when maxRadius is reached!!!
+				}
+				
+			}, this));
+			
 			//Render			
 			this.adCoverage.setMap(this.map);
+			google.maps.event.trigger(this.map, "resize");
 		},
-		
-		/*
-		 * Draws a region on Google Map
-		 * The region param represents an array og LatLng objects defining the polygon
-		 */
-		drawRegion: function( region )
-		{
-			var regionCenter = new google.maps.LatLng(46.16, 24.13);
-			var regionRadius = 150000;
-			
-			this.transylvaniaRegion = new google.maps.Circle({
-				center: regionCenter,
-				radius: regionRadius,
-				strokeColor: "#81B23C",
-			    strokeOpacity: 0.8,
-			    strokeWeight: 2,
-			    fillColor: "#81B23C",
-			    fillOpacity: 0.2	
-			});
-			
-			this.transylvaniaRegion.setMap(this.map);
-			
-			google.maps.event.addListener(this.transylvaniaRegion, 'mouseover', GA.bind(function(){
-				this.transylvaniaRegion.strokeWeight = 5;
-				this.transylvaniaRegion.setMap(this.map);
-			}, this));
-			
-			google.maps.event.addListener(this.transylvaniaRegion, 'mouseout', GA.bind(function(){
-				this.transylvaniaRegion.strokeWeight = 2;
-				this.transylvaniaRegion.setMap(this.map);
-			}, this));
-			
-		}
+
 		
 		/*
 		 * Messages
 		 */
+		onDrawMarker: function( msg )
+		{
+			if ( !msg || !msg.lat || !msg.lon )
+				return;
+				
+			var markerInfo = {};
+			
+			markerInfo.url = this.markerInfo.url;
+			markerInfo.position = {};
+			markerInfo.position.lat = msg.lat;
+			markerInfo.position.lng = msg.lon;
+			
+			this.drawMarker( markerInfo );
+		},
 		
-		
-		
+		onUserGeocoded: function( msg )
+		{
+			if ( !msg || !msg.lat || !msg.lon )
+				return;
+				
+			var markerInfo = {};
+			
+			markerInfo.url = this.markerInfo.url;
+			markerInfo.position = {};
+			markerInfo.position.lat = msg.lat;
+			markerInfo.position.lng = msg.lon;
+			
+			this.drawMarker( markerInfo );
+		}
 	});
 	
 	// Publish
@@ -512,6 +671,118 @@
 	
 	// Publish
 	GA.StepsView = StepsView;
+	
+}(GA));
+
+(function( GA )
+{
+	var INPUT_SELECTOR = "#search-input";
+	
+	var SearchView = GA.View.extend({
+		
+		events: {
+			"#search-btn": {
+				click: "onSearch"
+			},
+			
+			"#search-input": {
+				keyup: "onKeyUp"
+			},
+		},
+		
+		init: function( cfg ) {
+			
+			// Call super
+			this._parent( cfg );
+			
+			this.dataManager.on('userGeocoded', GA.bind( this.onUserGeocoded, this));
+		},
+		
+		register: function()
+		{
+			//this.onMessage("stateChanged", this.onStateChanged);
+		},
+		
+		render: function()
+		{
+			this.container.innerHTML = this.mustache( this.templates.main, {});
+			
+			return this;
+		},
+		
+		search: function( value, multipleResults )
+		{
+			this.searchInputText = value || this.getInputValue();
+			
+			if (!this.searchInputText)
+				return;
+			
+			this.dataManager.geocode( this.searchInputText, true, {
+				success: GA.bind( function( addresses ) {
+					
+					if ( addresses.length == 0 )
+						return;
+					
+					var addressName = addresses[0].address;
+					var addressLat = addresses[0].lat;
+					var addressLon = addresses[0].lon;
+					
+					this.setInputValue( addressName );
+					
+					this.sendMessage( "drawMarker", {
+						lat: addressLat,
+						lon: addressLon
+					});
+					
+					// if( (addresses.length > 1 && !this.useFirstAddress) || this.dynamicSearch)
+						// this.renderAddresses( addresses );
+					// else
+						// this.searchAroundAddress( addresses[0] );
+						
+				}, this)
+			} )
+		},
+		
+		setInputValue: function( value )
+		{
+			GA.one( INPUT_SELECTOR, this.container ).value = value;
+		},
+		
+		getInputValue: function()
+		{
+				return GA.one( INPUT_SELECTOR, this.container ).value;
+		},
+		
+		/*
+		 * Events
+		 */
+		onSearch: function( evt )
+		{
+			this.search();
+		},
+		
+		onKeyUp: function( evt )
+		{
+			if( evt.keyCode == 13)
+				this.search();
+		},
+		
+		/*
+		 * Messages
+		 */
+		
+		onUserGeocoded: function( msg )
+		{
+			if ( !msg || !msg.address )
+				return;
+				
+			this.setInputValue( msg.address );
+		}
+		
+	});
+	
+	// Publish
+	GA.SearchView = SearchView;
 	
 }(GA));
 

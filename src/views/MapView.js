@@ -3,6 +3,7 @@
 	var MapView = GA.View.extend({
 		
 		map: null,
+		maxRadius: 2000,
 		
 		events: {
 			
@@ -13,6 +14,8 @@
 			// Call super
 			this._parent( cfg );
 			
+			this.dataManager.on('userGeocoded', GA.bind( this.onUserGeocoded, this));
+			
 			this.markerInfo = cfg.markerInfo || {
 				url: "images/orange-pin.png",
 				position: { 
@@ -21,20 +24,24 @@
 				}
 			};
 			
-			this.radius = cfg.radius || 1000;
-			this.zoom = cfg.zoom || 15;
+			this.radius = cfg.radius || 100;
+			
+			if ( this.radius > this.maxRadius )
+				this.radius = this.maxRadius;
+			
+			this.startZoom = cfg.startZoom || 3;
 		},
 		
 		register: function()
 		{
-			//this.onMessage("showView", this.onShowView);
+			this.onMessage("drawMarker", this.onDrawMarker);
 		},
 		
 		render: function()
 		{
 			var mapOptions = 
 			{
-				zoom: this.zoom,
+				zoom: this.startZoom,
 				center: new google.maps.LatLng(this.markerInfo.position.lat, this.markerInfo.position.lng),
 				mapTypeId: google.maps.MapTypeId.ROADMAP,
 				mapTypeControl: true,
@@ -42,8 +49,9 @@
 			        style: google.maps.MapTypeControlStyle.DEFAULT,
 			        position: google.maps.ControlPosition.TOP_RIGHT
 			    },
-			    panControl: true,
-			    zoomControl: true,
+			    panControl: false,
+			    zoomControl: false,
+			    streetViewControl: false,
 			    zoomControlOptions: {
 			        style: google.maps.ZoomControlStyle.SMALL
 			    },
@@ -51,26 +59,44 @@
 			
 			this.map = new google.maps.Map( this.container, mapOptions );
 			
-			this.drawMarker();
-			
 			return this;
+		},
+		
+		centerAndZoom: function( center, zoom )
+		{
+			if ( !center || !center.lat || !center.lon || !zoom)
+				return;
+				
+			var center = new google.maps.LatLng( center.lat, center.lon );
+			
+			this.map.setCenter( center );
+			this.map.setZoom( zoom );
 		},
 		
 		/*
 		 * Draws the draggable location marker
 		 */
-		drawMarker: function()
+		drawMarker: function( markerInfo )
 		{
+			this.markerInfo = markerInfo || this.markerInfo; 
+			
 			if ( !this.markerInfo )
 				return;
-				
-			this.marker = new google.maps.Marker({
-				map: this.map,
-				animation: google.maps.Animation.DROP,
-				draggable: true,
-				icon: this.markerInfo.url,
-				position: new google.maps.LatLng( this.markerInfo.position.lat, this.markerInfo.position.lng )
-			});
+			
+			if ( !this.marker )
+			{
+				this.createMarker( this.markerInfo );
+			}
+			else
+			{
+				this.marker.setPosition( new google.maps.LatLng( this.markerInfo.position.lat, this.markerInfo.position.lng ) );
+			}
+			
+			//Center and zoom map
+			this.centerAndZoom( {
+				lat: this.markerInfo.position.lat,
+				lon: this.markerInfo.position.lng
+			}, 17 ); 
 			
 			this.drawCoverage();
 			
@@ -86,6 +112,17 @@
 			google.maps.event.addListener(this.marker, "dragend", GA.bind(function(){
 				this.drawCoverage();
 			}, this));
+		},
+		
+		createMarker: function( markerInfo )
+		{
+			this.marker = new google.maps.Marker({
+				map: this.map,
+				animation: google.maps.Animation.DROP,
+				draggable: true,
+				icon: markerInfo.url,
+				position: new google.maps.LatLng( markerInfo.position.lat, markerInfo.position.lng )
+			});
 		},
 		
 		drawCoverage: function()
@@ -110,6 +147,17 @@
 				this.adCoverage.setCenter( center );
 			}
 			
+			google.maps.event.addListener(this.adCoverage, "radius_changed", GA.bind(function( evt ){
+				
+				if ( this.adCoverage.radius > this.maxRadius )
+				{
+					this.adCoverage.setRadius( this.maxRadius );
+					
+					//@ToDO: Should show a message to the user when maxRadius is reached!!!
+				}
+				
+			}, this));
+			
 			//Render			
 			this.adCoverage.setMap(this.map);
 			google.maps.event.trigger(this.map, "resize");
@@ -119,9 +167,35 @@
 		/*
 		 * Messages
 		 */
+		onDrawMarker: function( msg )
+		{
+			if ( !msg || !msg.lat || !msg.lon )
+				return;
+				
+			var markerInfo = {};
+			
+			markerInfo.url = this.markerInfo.url;
+			markerInfo.position = {};
+			markerInfo.position.lat = msg.lat;
+			markerInfo.position.lng = msg.lon;
+			
+			this.drawMarker( markerInfo );
+		},
 		
-		
-		
+		onUserGeocoded: function( msg )
+		{
+			if ( !msg || !msg.lat || !msg.lon )
+				return;
+				
+			var markerInfo = {};
+			
+			markerInfo.url = this.markerInfo.url;
+			markerInfo.position = {};
+			markerInfo.position.lat = msg.lat;
+			markerInfo.position.lng = msg.lon;
+			
+			this.drawMarker( markerInfo );
+		}
 	});
 	
 	// Publish
