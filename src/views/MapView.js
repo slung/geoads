@@ -201,6 +201,15 @@
 		
 		onNextStepClick: function( evt )
 		{
+			//Save the configured ad and move to the Info View
+			
+			var markerPosition  = this.marker.getPosition();
+			var adCoverage = this.adCoverage.getRadius();
+			
+			//Save
+			this.adManager.setAdMapSettings( { lat: markerPosition, lon: markerPosition.lng() }, adCoverage );
+			
+			//Switch to Info View
 			this.sendMessage("changeState", { state: GA.App.States.INFO });
 		},
 	});

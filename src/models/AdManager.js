@@ -4,21 +4,24 @@
 	var adManager = null;
 	var AdManager = new Class({
 		
-		ad: null,
+		ad: {},
 		
 		init: function()
 		{
 			
 		},
 		
-		setAd: function( adCenter, adRadius, adName, adDescripton )
+		setAdMapSettings: function( adCenter, adRadius )
+		{
+			this.ad.center = adCenter;
+			this.ad.radius = adRadius;
+		},
+		
+		setAdInfoSettings: function( adName, adDescripton )
 		{
 			if ( !adCenter || !adRadius || !adName || !addDescription )
 				return;
 			
-			this.ad = {};
-			this.ad.center = adCenter;
-			this.ad.radius = adRadius;
 			this.ad.name = adName;
 			this.ad.description = adDescripton;
 		},
