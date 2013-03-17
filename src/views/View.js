@@ -17,6 +17,7 @@
 			this.formatRenderData = cfg.formatRenderData;
 			this.dataManager = GA.DataManager.getInstance();
 			this.adManager = GA.AdManager.getInstance();
+			this.ajax = GA.ajax;
 			
 			this.events = GA.extend( this.events || {}, cfg.events || {} );
 			
