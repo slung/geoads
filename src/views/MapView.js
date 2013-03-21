@@ -207,7 +207,7 @@
 			var adCoverage = this.adCoverage.getRadius();
 			
 			//Save
-			this.adManager.setAdMapSettings( { lat: markerPosition, lon: markerPosition.lng() }, adCoverage );
+			this.adManager.setAdMapSettings( { lat: markerPosition.lat(), lon: markerPosition.lng() }, adCoverage );
 			
 			//Switch to Info View
 			this.sendMessage("changeState", { state: GA.App.States.INFO });

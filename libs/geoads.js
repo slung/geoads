@@ -1,5 +1,190 @@
 (function( GA )
 {
+	/**
+	 * Ajax class is used to make XHR requests.
+	 * 
+	 * @class Ajax
+	 * @module core
+	 * @version 0.1.0
+	 * 
+	 * @constructor Ajax
+	 */
+	function Ajax()
+	{
+		//this.createXhr();
+	}
+	
+	Ajax.prototype = {
+			
+		/**
+		 * Creates a new XHR request
+		 * depending on the browser. 
+		 * 
+		 * @method createXhr
+		 * @param options {Object}
+		 */
+		createXhr: function( options )
+		{
+			if( options )
+				this.options = options;
+			
+			var ajax = this;
+			
+			//Don't create XDR object if the url points to the origin
+			//IE doesn't like to this
+			if( this.isIE() && !this.isSameWithOrigin(this.url) )
+			{
+				if( this.xhr )
+					this.xhr.abort();
+				
+				this.xhr = new XDomainRequest();
+				this.xhr.onload = function(){ ajax.onComplete(); };
+			    this.xhr.onerror = function() { ajax.onError(); };
+				
+			}
+			else
+			{
+				if (!!window.XMLHttpRequest) 
+				{
+					this.xhr = new window.XMLHttpRequest(); // Most browsers
+				}
+				else if (!!window.ActiveXObject) 
+				{
+					this.xhr = new window.ActiveXObject('Microsoft.XMLHTTP'); // Some IE
+				}
+			}
+			
+			if( !this.xhr )
+				throw new Error("Unable to create XHR object!");
+			
+			
+			var ajax = this;
+			
+			this.xhr.onreadystatechange = function () 
+			{
+				 if (this.readyState === 4) 
+				 {
+					if (this.status >= 400)
+						ajax.onError();
+					else
+						ajax.onComplete();
+				  }
+			 };
+			 
+			 this.xhr.onprogress = function()
+			 {
+				 
+			 };
+			 
+			 this.xhr.ontimeout = function()
+			 {
+			 	throw new Error("timeout");
+			 };
+			 
+			 return;
+		},
+		
+		abort: function()
+		{
+			this.xhr.abort();
+		},
+		
+		/**
+		 * Helper function for IE check.
+		 * 
+		 * @method isIE
+		 */
+		isIE: function()
+		{
+			if (navigator.appVersion.indexOf("MSIE") != -1)
+				return true;
+			
+			return false;
+		},
+		
+		/**
+		 * Helper function to compare the domains of two URLs
+		 * 
+		 * @method isSameWithOrigin
+		 */
+		isSameWithOrigin: function ( url )
+		{
+			var reg = new RegExp("^http(s)?://.*?(/|$)","i");
+			
+			var newHost = reg.exec(url)[0];
+			var originHost = reg.exec( window.location.href)[0];
+			
+			
+			return  ( originHost === newHost );
+		},
+		
+		/**
+		 * Send XHR request to server.
+		 * 
+		 * @param url
+		 * @param options
+		 */
+		send: function( url, options )
+		{
+			this.options = options;
+			this.url = url;
+			
+			if( !this.xhr )
+				this.createXhr();
+			
+		    this.xhr.open(options.method, url, true);
+		    
+		    // IE needs timeout set after xhr.open()
+		    this.xhr.timeout = 20000;
+		    
+		    //Use credentials 
+		    if(this.xhr.withCredentials !== undefined)
+		    	if( options.withCredentials )
+		    		this.xhr.withCredentials  = options.withCredentials;
+		    
+		    // IE XDR doesn't support request headers
+		    if(this.xhr.setRequestHeader && options.headers)
+		    	for( var i = 0; i < options.headers.length ; i++ )
+		    		this.xhr.setRequestHeader(  options.headers[i].name , options.headers[i].value  );
+		    
+		    //Data payload
+		    if(options.data)
+		    	this.xhr.send(options.data);
+		    else
+		    	this.xhr.send(null);
+		   
+		    
+		    function timeoutHandler() {
+		        throw new Error('Loading timeout: ' + url);
+		    };
+		    
+		    return this;
+		},
+		
+		onComplete: function()
+		{
+			if( this.options.on.success )
+				this.options.on.success( this.xhr.responseText );
+		},
+		
+		onError: function()
+		{
+			if( this.options.on.error )
+				this.options.on.error(this.xhr.responseText);
+		}	
+	};
+	
+	// Create & add an instance of ajax to GeoAds namespace
+	GA.ajax = function( url, confg )
+	{
+		return new Ajax().send(url, confg);
+	};
+	
+})(GA);
+
+
+(function( GA )
+{
 	var EventManager = new Class({
 		
 		$events: null,
@@ -260,21 +445,24 @@
 	var adManager = null;
 	var AdManager = new Class({
 		
-		ad: null,
+		ad: {},
+		geoAdsPlatformUrl: "http://127.0.0.1:1314/",
 		
 		init: function()
 		{
-			
 		},
 		
-		setAd: function( adCenter, adRadius, adName, adDescripton )
+		setAdMapSettings: function( adCenter, adRadius )
 		{
-			if ( !adCenter || !adRadius || !adName || !addDescription )
-				return;
-			
-			this.ad = {};
 			this.ad.center = adCenter;
 			this.ad.radius = adRadius;
+		},
+		
+		setAdInfoSettings: function( adName, adDescripton )
+		{
+			if ( !adName || !adDescripton )
+				return;
+			
 			this.ad.name = adName;
 			this.ad.description = adDescripton;
 		},
@@ -282,6 +470,57 @@
 		getAd: function()
 		{
 			return this.ad;
+		},
+		
+		//GeoAds Platform communication
+		saveAd: function()
+		{
+			if ( !this.ad || !this.ad.center || !this.ad.radius || !this.ad.name )
+				return;
+				
+			var url = this.geoAdsPlatformUrl + "savead/";
+			
+			//Ad Name
+			url += this.ad.name + "/";
+			
+			//Ad Center (lat and lon)
+			url += this.ad.center.lat + "/" + this.ad.center.lon + "/";
+			
+			//Ad radius
+			url += this.ad.radius;
+			
+			var cfg = {
+		        method: 'GET',
+		        on: {
+		        	success: GA.bind( function( data ) {
+		        		
+		        		alert("Great success!");
+		        		
+		        		// if( success )
+		        			// success.apply( this, [ M.JSON.parse(data) ] );
+		        		
+		        	}, this),
+		        	error: function ( error )
+		        	{
+		        		console.log(error);
+		        	}
+		        },
+		        headers: [ { name:"Content-Type", value:"text/plain"} ]
+		    };
+		
+		    // Send request
+		    if ( !GA.ajax )
+		        throw new Error("Ajax function is not defined");
+			    
+		    //GA.ajax(url, cfg);
+		    jQuery.ajax({
+		    	url: url,
+		    	type: 'GET',
+		    	success: function(res)
+		    	{
+		    		alert("Great Success");
+		    	}
+		    });
 		}
 	});	
 
@@ -318,6 +557,7 @@
 			this.formatRenderData = cfg.formatRenderData;
 			this.dataManager = GA.DataManager.getInstance();
 			this.adManager = GA.AdManager.getInstance();
+			this.ajax = GA.ajax;
 			
 			this.events = GA.extend( this.events || {}, cfg.events || {} );
 			
@@ -559,6 +799,15 @@
 		
 		onNextStepClick: function( evt )
 		{
+			//Save the configured ad and move to the Info View
+			
+			var markerPosition  = this.marker.getPosition();
+			var adCoverage = this.adCoverage.getRadius();
+			
+			//Save
+			this.adManager.setAdMapSettings( { lat: markerPosition.lat(), lon: markerPosition.lng() }, adCoverage );
+			
+			//Switch to Info View
 			this.sendMessage("changeState", { state: GA.App.States.INFO });
 		},
 	});
@@ -773,10 +1022,16 @@
 
 (function( GA )
 {
+	var COMPANY_INPUT_SELECTOR = "#company-name";
+	var KEYWORDS_INPUT_SELECTOR = "#keywords";
+	
 	var InfoView = GA.View.extend({
 		
 		events: {
-			"#previous-step":{
+			"#publish": {
+				click: "onPublishClick"
+			},
+			"#previous-step": {
 				click: "onPreviousStepClick"
 			}
 		},
@@ -798,6 +1053,16 @@
 			return this;
 		},
 		
+		inputValid: function( inputSelector )
+		{
+			var inputContent = GA.one(inputSelector, this.container).value;
+			
+			if ( inputContent.length > 0 )
+				return true;
+			else
+				return false;
+		},
+		
 		/*
 		 * Events
 		 */
@@ -805,6 +1070,19 @@
 		{
 			this.sendMessage("changeState", { state: GA.App.States.MAP });
 		},
+		
+		onPublishClick: function( evt )
+		{
+			var companyName = GA.one( COMPANY_INPUT_SELECTOR, this.container ).value;
+			var keywords = GA.one( KEYWORDS_INPUT_SELECTOR, this.container ).value;
+			
+			if ( this.inputValid( COMPANY_INPUT_SELECTOR ) && this.inputValid( KEYWORDS_INPUT_SELECTOR ) )
+			{
+				this.adManager.setAdInfoSettings( companyName, keywords );
+				this.adManager.saveAd();
+			}
+				
+		}
 	});
 	
 	// Publish

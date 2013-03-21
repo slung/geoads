@@ -33,7 +33,7 @@
 		
 		inputValid: function( inputSelector )
 		{
-			var inputContent = GA.one(inputSelector, this.container);
+			var inputContent = GA.one(inputSelector, this.container).value;
 			
 			if ( inputContent.length > 0 )
 				return true;
@@ -51,11 +51,15 @@
 		
 		onPublishClick: function( evt )
 		{
-			var companyName = GA.one( COMPANY_INPUT_SELECTOR, this.container );
-			var keywords = GA.one( KEYWORDS_INPUT_SELECTOR, this.container );
+			var companyName = GA.one( COMPANY_INPUT_SELECTOR, this.container ).value;
+			var keywords = GA.one( KEYWORDS_INPUT_SELECTOR, this.container ).value;
 			
 			if ( this.inputValid( COMPANY_INPUT_SELECTOR ) && this.inputValid( KEYWORDS_INPUT_SELECTOR ) )
+			{
 				this.adManager.setAdInfoSettings( companyName, keywords );
+				this.adManager.saveAd();
+			}
+				
 		}
 	});
 	
