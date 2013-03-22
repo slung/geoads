@@ -19,7 +19,7 @@
 			// Call super
 			this._parent( cfg );
 			
-			this.dataManager.on('userGeocoded', GA.bind( this.onUserGeocoded, this));
+			this.dataManager.on( 'userGeocoded', GA.bind( this.onUserGeocoded, this) );
 		},
 		
 		register: function()
