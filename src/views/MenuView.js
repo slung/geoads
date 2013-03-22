@@ -39,7 +39,9 @@
 		onStateChanged: function( msg )
 		{
 			//Make Sign in, Sign up, Publish and About menu items visible if in HOME state, else hide
-			if ( msg.currentState == GA.App.States.HOME )
+			if ( msg.currentState == GA.App.States.HOME || 
+				 msg.currentState == GA.App.States.LOGIN ||
+				 msg.currentState == GA.App.States.REGISTER)
 			{
 				GA.removeClass(GA.one(LOGIN_MENU_ITEM_SELECTOR, this.container), "hide");
 				GA.removeClass(GA.one(REGISTER_MENU_ITEM_SELECTOR, this.container), "hide");

@@ -107,7 +107,7 @@ input[type="text"]:focus
 	background-color: #3498db;
 }
 
-#login .btn.btn-primary:hover
+#login .btn.btn-primary:hover, #register .btn.btn-primary:hover
 {
 	opacity: 0.8;
 }

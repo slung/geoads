@@ -203,6 +203,12 @@
 		onResizeMap: function( msg )
 		{
 			google.maps.event.trigger(this.map, "resize");
+			
+			//Center and zoom map
+			this.centerAndZoom( {
+				lat: this.markerInfo.position.lat,
+				lon: this.markerInfo.position.lng
+			}, 17 );
 		},
 		
 		/*
