@@ -51,11 +51,22 @@
 							}),
 							
 							/*
+							 * Menu View
+							 */
+							new GA.AccountView({
+								container: GA.one("#account"),
+								hideOnStates: [ GA.App.States.MAP, GA.App.States.INFO ],
+								templates: {
+									main: $j.trim( GA.one("#account-tpl").innerHTML )
+								}
+							}),
+							
+							/*
 							 * Search View
 							 */
 							new GA.SearchView({
 								container: GA.one("#search"),
-								hideOnStates: [ GA.App.States.INFO ],
+								hideOnStates: [ GA.App.States.HOME, GA.App.States.INFO, GA.App.States.ACCOUNT ],
 								templates: {
 									main: $j.trim( GA.one("#search-tpl").innerHTML )
 								}
@@ -67,7 +78,7 @@
 							new GA.MapView({
 								container: GA.one("#map"),
 								renderContainer: GA.one("#map-container"),
-								hideOnStates: [ GA.App.States.INFO ],
+								hideOnStates: [ GA.App.States.HOME, GA.App.States.INFO ],
 								zoom: 17,
 								markerInfo:{
 									url: "images/grey-blue-pin-48.png",
@@ -85,7 +96,7 @@
 							 */
 							new GA.InfoView({
 								container: GA.one("#info"),
-								hideOnStates: [ GA.App.States.MAP ],
+								hideOnStates: [ GA.App.States.HOME, GA.App.States.MAP, GA.App.States.ACCOUNT ],
 								templates: {
 									main: $j.trim( GA.one("#info-tpl").innerHTML )
 								}	
@@ -110,6 +121,7 @@
 			<div id="menu"></div>
 			<div id="steps"></div>
 			<div id="search"></div>
+			<div id="account"></div>
 			<div id="map">
 				<div id="next-step" class="yui3-u" title="Next Step"></div>
 				<div id="map-container"></div>
@@ -122,7 +134,8 @@
 		<!-- Menu View -->
 		<script id="menu-tpl" type="text/template">
 			<div class="menu-container">
-				<div id="home" class="yui3-u logo">GeoAds</div>
+				<div id="home" class="yui3-u logo menu-item">GeoAds</div>
+				<div id="login" class="yui3-u menu-item">Login</div>
 			</div>
 		</script>
 		
@@ -145,6 +158,25 @@
 				<input id="keywords" type="text" maxlength="25" placeholder="Add keywords describing your company (visible to users)"/>
 				<a id="publish" href="#" class="btn btn-large btn-block btn-info">Put me on the map</a>
 			</div>
+		</script>
+		
+		<!-- Account View -->
+		<script id="account-tpl" type="text/template">
+	          <div class="login-form">
+	          	<img id="close" src="images/close.png"/>
+	            <div class="control-group">
+	              <input type="text" class="login-field" value="" placeholder="Enter your email" id="login-name">
+	              <label class="login-field-icon fui-man-16" for="login-name"></label>
+	            </div>
+	
+	            <div class="control-group">
+	              <input type="password" class="login-field" value="" placeholder="Password" id="login-pass">
+	              <label class="login-field-icon fui-lock-16" for="login-pass"></label>
+	            </div>
+	
+	            <a id="submit" class="btn btn-primary btn-large btn-block" href="#">Login</a>
+	            <a id="lost" class="login-link" href="#">Lost your password?</a>
+	          </div>
 		</script>
 		
 	</body>

@@ -38,7 +38,7 @@
 				case "home":
 				{
 					this.sendMessage("changeState", {
-						state: GA.App.States.GALLERY
+						state: GA.App.States.HOME
 					});
 					
 					break;
@@ -53,10 +53,10 @@
 					break;
 				}
 				
-				case "places":
+				case "login":
 				{
 					this.sendMessage("changeState", {
-						state: GA.App.States.PLACES
+						state: GA.App.States.ACCOUNT
 					});
 					
 					break;

@@ -131,7 +131,9 @@
 	GA.App = GeoAdsApp;
 	
 	GA.App.States = {};
+	GA.App.States.HOME = 'home';
 	GA.App.States.MAP = 'map';
 	GA.App.States.INFO = 'info';
+	GA.App.States.ACCOUNT = 'account';
 	
 }(GA));

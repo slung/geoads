@@ -6,6 +6,12 @@ body
 	padding: 0px;
 }
 
+input:focus,
+input[type="text"]:focus
+{
+	border-color: #00A4E4 !important;
+}
+
 .hide-view
 {
 	display: none !important;
@@ -37,22 +43,80 @@ body
 	background: url('../images/header-bg.png') repeat-x;
 }
 
-.page #menu .logo
+.page #menu .menu-item
 {
 	font-family: 'Alfa Slab One', cursive;
-	font-size: 30px;
+	font-size: 14px;
 	color: white;
-	
-	margin: 7px 0px 0px 40px;
+	line-height: 50px;
+	vertical-align: middle;
+	margin-left: 40px;
+	cursor: pointer;
+}
+
+.page #menu .menu-item:hover
+{
+	opacity: 0.8;
+}
+
+.page #menu .logo
+{
+	font-size: 30px;
 	
 	cursor: pointer;
 }
 
-.page #menu .menu-item
+/*
+ * Account
+ */
+
+#account
 {
-	margin-left: 40px;
+	width: 360px;
+	
+	position: absolute;
+	top: 55px;
+	bottom: 0;
+	left: 70px;
+	right: 0;
+	
+	z-index: 5000;
+}
+
+#account .login-form:before
+{
+	left: 150px;
+	top: -18px;
+	-webkit-transform: rotate(90deg);
+}
+
+#account .btn.btn-primary
+{
+	background-color: #3498db;
+}
+
+#account .btn.btn-primary:hover
+{
+	opacity: 0.8;
+}
+
+#account .login-link:hover
+{
+	color: #00A4E4 !important;
+}
+
+#account .login-form .login-field:focus + .login-field-icon
+{
+	color: #3498db;
+}
+
+#account .login-form #close
+{
+	position: absolute;
+	top: 3px;
+	right: 5px;
+	
 	cursor: pointer;
-	margin-top: 14px;
 }
 
 /*
