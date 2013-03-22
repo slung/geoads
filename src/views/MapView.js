@@ -37,6 +37,7 @@
 		register: function()
 		{
 			this.onMessage("drawMarker", this.onDrawMarker);
+			this.onMessage("resizeMap", this.onResizeMap);
 		},
 		
 		render: function()
@@ -199,6 +200,15 @@
 			this.drawMarker( markerInfo );
 		},
 		
+		onResizeMap: function( msg )
+		{
+			google.maps.event.trigger(this.map, "resize");
+		},
+		
+		/*
+		 * Events
+		 */
+		
 		onNextStepClick: function( evt )
 		{
 			//Save the configured ad and move to the Info View
@@ -212,6 +222,7 @@
 			//Switch to Info View
 			this.sendMessage("changeState", { state: GA.App.States.INFO });
 		},
+
 	});
 	
 	// Publish

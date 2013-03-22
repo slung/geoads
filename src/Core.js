@@ -79,7 +79,7 @@
 				this.appReady.call(this, []);
 		},
 		
-		changeState: function( state )
+		changeState: function( state, msg )
 		{
 			//if same state => no good
 			if (state == this.state && this.lastState != null)
@@ -134,6 +134,7 @@
 	GA.App.States.HOME = 'home';
 	GA.App.States.MAP = 'map';
 	GA.App.States.INFO = 'info';
-	GA.App.States.ACCOUNT = 'account';
+	GA.App.States.LOGIN = 'login';
+	GA.App.States.REGISTER = 'register';
 	
 }(GA));

@@ -1,15 +1,12 @@
 (function( GA )
 {
-	var AccountView = GA.View.extend({
+	var RegisterView = GA.View.extend({
 		
 		events: {
-			"#submit":{
-				click: "onLoginSubmitClick"
+			"#registerBtn":{
+				click: "onRegisterSubmitClick"
 			},
-			"#lost":{
-				click: "onLostPasswordClick"
-			},
-			"#close":{
+			"#closeBtn":{
 				click: "onCloseAccountClick"
 			}
 		},
@@ -24,7 +21,7 @@
 		{
 		},
 		
-		render: function()
+		render: function( template )
 		{
 			this.container.innerHTML = this.mustache( this.templates.main, {});
 			
@@ -32,20 +29,20 @@
 		},
 		
 		/*
+		 * Messages
+		 */
+		
+		
+		/*
 		 * Events
 		 */
 		
 		onCloseAccountClick: function( evt )
 		{
-			this.sendMessage("reverseState");
+			this.sendMessage("changeState", { state: GA.App.States.HOME });
 		},
 		
-		onLoginSubmitClick: function( evt )
-		{
-			
-		},
-		
-		onLostPasswordClick: function( evt )
+		onRegisterSubmitClick: function( evt )
 		{
 			
 		}
@@ -53,6 +50,6 @@
 	});
 	
 	// Publish
-	GA.AccountView = AccountView;
+	GA.RegisterView = RegisterView;
 	
 }(GA));

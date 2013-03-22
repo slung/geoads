@@ -413,6 +413,44 @@
 
 (function( GA )
 {
+	var HomeView = GA.View.extend({
+		
+		events: {
+			
+		},
+		
+		init: function( cfg ) {
+			
+			// Call super
+			this._parent( cfg );
+		},
+		
+		register: function()
+		{
+		},
+		
+		render: function()
+		{
+			this.container.innerHTML = this.mustache( this.templates.main, {});
+			
+			return this;
+		},
+		
+		/*
+		 * Events
+		 */
+		
+		
+		
+	});
+	
+	// Publish
+	GA.HomeView = HomeView;
+	
+}(GA));
+
+(function( GA )
+{
 	var MapView = GA.View.extend({
 		
 		map: null,
@@ -450,6 +488,7 @@
 		register: function()
 		{
 			this.onMessage("drawMarker", this.onDrawMarker);
+			this.onMessage("resizeMap", this.onResizeMap);
 		},
 		
 		render: function()
@@ -612,6 +651,15 @@
 			this.drawMarker( markerInfo );
 		},
 		
+		onResizeMap: function( msg )
+		{
+			google.maps.event.trigger(this.map, "resize");
+		},
+		
+		/*
+		 * Events
+		 */
+		
 		onNextStepClick: function( evt )
 		{
 			//Save the configured ad and move to the Info View
@@ -625,6 +673,7 @@
 			//Switch to Info View
 			this.sendMessage("changeState", { state: GA.App.States.INFO });
 		},
+
 	});
 	
 	// Publish
@@ -634,6 +683,12 @@
 
 (function( GA )
 {
+	var HOME_MENU_ITEM_SELECTOR = "#home-item";
+	var LOGIN_MENU_ITEM_SELECTOR = "#login-item";
+	var REGISTER_MENU_ITEM_SELECTOR = "#register-item";
+	var PUBLISH_MENU_ITEM_SELECTOR = "#publish-item";
+	var ABOUT_MENU_ITEM_SELECTOR = "#about-item";
+	
 	var MenuView = GA.View.extend({
 		
 		events: {
@@ -650,6 +705,7 @@
 		
 		register: function()
 		{
+			this.onMessage("stateChanged", this.onStateChanged);
 		},
 		
 		render: function()
@@ -657,6 +713,29 @@
 			this.container.innerHTML = this.mustache( this.templates.main, {});
 			
 			return this;
+		},
+		
+		/*
+		 * Messages
+		 */
+		
+		onStateChanged: function( msg )
+		{
+			//Make Sign in, Sign up, Publish and About menu items visible if in HOME state, else hide
+			if ( msg.currentState == GA.App.States.HOME )
+			{
+				GA.removeClass(GA.one(LOGIN_MENU_ITEM_SELECTOR, this.container), "hide");
+				GA.removeClass(GA.one(REGISTER_MENU_ITEM_SELECTOR, this.container), "hide");
+				GA.removeClass(GA.one(PUBLISH_MENU_ITEM_SELECTOR, this.container), "hide");
+				GA.removeClass(GA.one(ABOUT_MENU_ITEM_SELECTOR, this.container), "hide");
+			}
+			else
+			{
+				GA.addClass(GA.one(LOGIN_MENU_ITEM_SELECTOR, this.container), "hide");
+				GA.addClass(GA.one(REGISTER_MENU_ITEM_SELECTOR, this.container), "hide");
+				GA.addClass(GA.one(PUBLISH_MENU_ITEM_SELECTOR, this.container), "hide");
+				GA.addClass(GA.one(ABOUT_MENU_ITEM_SELECTOR, this.container), "hide");
+			}
 		},
 		
 		/*
@@ -669,7 +748,7 @@
 			
 			switch ( menuItem )
 			{
-				case "home":
+				case "home-item":
 				{
 					this.sendMessage("changeState", {
 						state: GA.App.States.HOME
@@ -678,37 +757,30 @@
 					break;
 				}
 				
-				case "map":
+				case "publish-item":
 				{
 					this.sendMessage("changeState", {
 						state: GA.App.States.MAP
 					});
 					
+					this.sendMessage("resizeMap");
+					
 					break;
 				}
 				
-				case "login":
+				case "login-item":
 				{
 					this.sendMessage("changeState", {
-						state: GA.App.States.ACCOUNT
+						state: GA.App.States.LOGIN
 					});
 					
 					break;
 				}
 				
-				case "tours":
+				case "register-item":
 				{
 					this.sendMessage("changeState", {
-						state: GA.App.States.TOURS
-					});
-					
-					break;
-				}
-				
-				case "contact":
-				{
-					this.sendMessage("changeState", {
-						state: GA.App.States.CONTACT
+						state: GA.App.States.REGISTER
 					});
 					
 					break;
@@ -907,16 +979,16 @@
 
 (function( GA )
 {
-	var AccountView = GA.View.extend({
+	var LoginView = GA.View.extend({
 		
 		events: {
-			"#submit":{
+			"#loginBtn":{
 				click: "onLoginSubmitClick"
 			},
-			"#lost":{
+			"#lostBtn":{
 				click: "onLostPasswordClick"
 			},
-			"#close":{
+			"#closeBtn":{
 				click: "onCloseAccountClick"
 			}
 		},
@@ -931,7 +1003,7 @@
 		{
 		},
 		
-		render: function()
+		render: function( template )
 		{
 			this.container.innerHTML = this.mustache( this.templates.main, {});
 			
@@ -939,12 +1011,17 @@
 		},
 		
 		/*
+		 * Messages
+		 */
+		
+		
+		/*
 		 * Events
 		 */
 		
 		onCloseAccountClick: function( evt )
 		{
-			this.sendMessage("reverseState");
+			this.sendMessage("changeState", { state: GA.App.States.HOME });
 		},
 		
 		onLoginSubmitClick: function( evt )
@@ -960,7 +1037,63 @@
 	});
 	
 	// Publish
-	GA.AccountView = AccountView;
+	GA.LoginView = LoginView;
+	
+}(GA));
+
+(function( GA )
+{
+	var RegisterView = GA.View.extend({
+		
+		events: {
+			"#registerBtn":{
+				click: "onRegisterSubmitClick"
+			},
+			"#closeBtn":{
+				click: "onCloseAccountClick"
+			}
+		},
+		
+		init: function( cfg ) {
+			
+			// Call super
+			this._parent( cfg );
+		},
+		
+		register: function()
+		{
+		},
+		
+		render: function( template )
+		{
+			this.container.innerHTML = this.mustache( this.templates.main, {});
+			
+			return this;
+		},
+		
+		/*
+		 * Messages
+		 */
+		
+		
+		/*
+		 * Events
+		 */
+		
+		onCloseAccountClick: function( evt )
+		{
+			this.sendMessage("changeState", { state: GA.App.States.HOME });
+		},
+		
+		onRegisterSubmitClick: function( evt )
+		{
+			
+		}
+		
+	});
+	
+	// Publish
+	GA.RegisterView = RegisterView;
 	
 }(GA));
 
@@ -1045,7 +1178,7 @@
 				this.appReady.call(this, []);
 		},
 		
-		changeState: function( state )
+		changeState: function( state, msg )
 		{
 			//if same state => no good
 			if (state == this.state && this.lastState != null)
@@ -1100,7 +1233,8 @@
 	GA.App.States.HOME = 'home';
 	GA.App.States.MAP = 'map';
 	GA.App.States.INFO = 'info';
-	GA.App.States.ACCOUNT = 'account';
+	GA.App.States.LOGIN = 'login';
+	GA.App.States.REGISTER = 'register';
 	
 }(GA));
 

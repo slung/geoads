@@ -37,9 +37,17 @@
 					
 					/** App **/
 					var app = new GA.App({
-						state: GA.App.States.MAP,
+						state: GA.App.States.HOME,
 						views: [
-						
+							/*
+							 * Home View
+							 */
+							new GA.HomeView({
+								container: GA.one("#home"),
+								templates: {
+									main: $j.trim( GA.one("#home-tpl").innerHTML )
+								}
+							}),
 							/*
 							 * Menu View
 							 */
@@ -49,36 +57,43 @@
 									main: $j.trim( GA.one("#menu-tpl").innerHTML )
 								}
 							}),
-							
 							/*
-							 * Menu View
+							 * Login View
 							 */
-							new GA.AccountView({
-								container: GA.one("#account"),
-								hideOnStates: [ GA.App.States.MAP, GA.App.States.INFO ],
+							new GA.LoginView({
+								container: GA.one("#login"),
+								hideOnStates: [ GA.App.States.HOME, GA.App.States.MAP, GA.App.States.INFO, GA.App.States.REGISTER ],
 								templates: {
-									main: $j.trim( GA.one("#account-tpl").innerHTML )
+									main: $j.trim( GA.one("#login-tpl").innerHTML )
 								}
 							}),
-							
+							/*
+							 * Register View
+							 */
+							new GA.RegisterView({
+								container: GA.one("#register"),
+								hideOnStates: [ GA.App.States.HOME, GA.App.States.MAP, GA.App.States.INFO, GA.App.States.LOGIN ],
+								templates: {
+									main: $j.trim( GA.one("#register-tpl").innerHTML )
+								}
+							}),
 							/*
 							 * Search View
 							 */
 							new GA.SearchView({
 								container: GA.one("#search"),
-								hideOnStates: [ GA.App.States.HOME, GA.App.States.INFO, GA.App.States.ACCOUNT ],
+								hideOnStates: [ GA.App.States.HOME, GA.App.States.INFO, GA.App.States.LOGIN, GA.App.States.REGISTER ],
 								templates: {
 									main: $j.trim( GA.one("#search-tpl").innerHTML )
 								}
 							}),
-							
 							/*
 							 * Map View
 							 */
 							new GA.MapView({
 								container: GA.one("#map"),
 								renderContainer: GA.one("#map-container"),
-								hideOnStates: [ GA.App.States.HOME, GA.App.States.INFO ],
+								hideOnStates: [ GA.App.States.HOME, GA.App.States.INFO, GA.App.States.LOGIN, GA.App.States.REGISTER ],
 								zoom: 17,
 								markerInfo:{
 									url: "images/grey-blue-pin-48.png",
@@ -90,13 +105,12 @@
 								templates: {
 								}	
 							}),
-							
 							/*
 							 * Info View
 							 */
 							new GA.InfoView({
 								container: GA.one("#info"),
-								hideOnStates: [ GA.App.States.HOME, GA.App.States.MAP, GA.App.States.ACCOUNT ],
+								hideOnStates: [ GA.App.States.HOME, GA.App.States.MAP, GA.App.States.LOGIN, GA.App.States.REGISTER ],
 								templates: {
 									main: $j.trim( GA.one("#info-tpl").innerHTML )
 								}	
@@ -119,9 +133,11 @@
 		
 		<div class="page">
 			<div id="menu"></div>
+			<div id="home"></div>
 			<div id="steps"></div>
 			<div id="search"></div>
-			<div id="account"></div>
+			<div id="login"></div>
+			<div id="register"></div>
 			<div id="map">
 				<div id="next-step" class="yui3-u" title="Next Step"></div>
 				<div id="map-container"></div>
@@ -131,11 +147,19 @@
 		
 		<!-- Templates -->
 		
+		<!-- Home View -->
+		<script id="home-tpl" type="text/template">
+			
+		</script>
+		
 		<!-- Menu View -->
 		<script id="menu-tpl" type="text/template">
 			<div class="menu-container">
-				<div id="home" class="yui3-u logo menu-item">GeoAds</div>
-				<div id="login" class="yui3-u menu-item">Login</div>
+				<div id="home-item" class="yui3-u logo menu-item">GeoAds</div>
+				<div id="login-item" class="yui3-u menu-item">Sign in</div>
+				<div id="register-item" class="yui3-u menu-item">Sign up</div>
+				<div id="publish-item" class="yui3-u menu-item">Publish</div>
+				<div id="about-item" class="yui3-u menu-item">About</div>
 			</div>
 		</script>
 		
@@ -161,9 +185,9 @@
 		</script>
 		
 		<!-- Account View -->
-		<script id="account-tpl" type="text/template">
+		<script id="login-tpl" type="text/template">
 	          <div class="login-form">
-	          	<img id="close" src="images/close.png"/>
+	          	<img id="closeBtn" src="images/close.png"/>
 	            <div class="control-group">
 	              <input type="text" class="login-field" value="" placeholder="Enter your email" id="login-name">
 	              <label class="login-field-icon fui-man-16" for="login-name"></label>
@@ -174,8 +198,30 @@
 	              <label class="login-field-icon fui-lock-16" for="login-pass"></label>
 	            </div>
 	
-	            <a id="submit" class="btn btn-primary btn-large btn-block" href="#">Login</a>
-	            <a id="lost" class="login-link" href="#">Lost your password?</a>
+	            <a id="loginBtn" class="btn btn-primary btn-large btn-block" href="#">Sign in</a>
+	            <a id="lostBtn" class="login-link" href="#">Lost your password?</a>
+	          </div>
+		</script>
+		
+		<script id="register-tpl" type="text/template">
+	          <div class="login-form">
+	          	<img id="closeBtn" src="images/close.png"/>
+	            <div class="control-group">
+	              <input type="text" class="login-field" value="" placeholder="Enter your email" id="login-name">
+	              <label class="login-field-icon fui-man-16" for="login-name"></label>
+	            </div>
+	
+	            <div class="control-group">
+	              <input id="register-pass" type="password" class="login-field" value="" placeholder="Password">
+	              <label class="login-field-icon fui-lock-16" for="login-pass"></label>
+	            </div>
+	            
+	            <div class="control-group">
+	              <input id="register-pass-confirm" type="password" class="login-field" value="" placeholder="Confirm Password">
+	              <label class="login-field-icon fui-lock-16" for="login-pass"></label>
+	            </div>
+	
+	            <a id="registerBtn" class="btn btn-primary btn-large btn-block" href="#">Sign up</a>
 	          </div>
 		</script>
 		
