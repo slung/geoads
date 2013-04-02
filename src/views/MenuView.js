@@ -89,6 +89,7 @@
 				
 				case "login-item":
 				{
+					window.location.href = "login";
 					this.sendMessage("changeState", {
 						state: GA.App.States.LOGIN
 					});
@@ -98,6 +99,7 @@
 				
 				case "register-item":
 				{
+					window.location.href = "register";
 					this.sendMessage("changeState", {
 						state: GA.App.States.REGISTER
 					});

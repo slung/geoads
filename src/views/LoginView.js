@@ -1,9 +1,16 @@
 (function( GA )
 {
+	//Selectors
 	var EMAIL_INPUT_SELECTOR = "#login-email";
 	var PASSWORD_INPUT_SELECTOR = "#login-pass";
+	
+	//Classes
 	var INPUT_ERROR_CLASS = "input-error";
-	var LOGIN_ERROR_MSG = "";
+	
+	//Messages
+	var INVALID_EMAIL_ERROR_MSG = "The e-mail is not valid!";
+	var INVALID_PASSWORD_ERROR_MSG = "The password is not valid!";
+	var INVALID_LOGIN_ERROR_MSG = "Sorry, your email or password are not valid!"
 	
 	var LoginView = GA.View.extend({
 		
@@ -14,8 +21,11 @@
 			"#lostBtn":{
 				click: "onLostPasswordClick"
 			},
-			"#closeBtn":{
-				click: "onCloseAccountClick"
+			".login-icon":{
+				click: "onHomeClick"
+			},
+			"#registerBtn":{
+				click: "onRegisterClick"
 			}
 		},
 		
@@ -31,7 +41,9 @@
 		
 		render: function( template )
 		{
-			this.container.innerHTML = this.mustache( this.templates.main, {});
+			this.container.innerHTML = this.mustache( this.templates.main, {
+				errorMessage: this.errorMessage
+			});
 			
 			return this;
 		},
@@ -46,28 +58,6 @@
 			return GA.one( PASSWORD_INPUT_SELECTOR, this.container ).value;
 		},
 		
-		validateEmailInput: function()
-		{
-			var email = this.getEmail();
-			
-			if ( email == "" )
-				return false;
-				
-			var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-			
-			return re.test(email);
-		},
-		
-		validatePasswordInput: function()
-		{
-			var password = this.getPassword();
-			
-			if ( password == "" )
-				return false;
-			
-			return true;
-		},
-		
 		/*
 		 * Messages
 		 */
@@ -77,52 +67,60 @@
 		 * Events
 		 */
 		
-		onCloseAccountClick: function( evt )
-		{
-			this.sendMessage("changeState", { state: GA.App.States.HOME });
-		},
-		
 		onLoginSubmitClick: function( evt )
 		{
-			var emailValid = false;
-			var passwordValid = false;
-			
-			if ( !this.validateEmailInput() )
+			if ( !GA.validateEmailInput( this.getEmail() ) )
 			{
+				this.errorMessage = INVALID_EMAIL_ERROR_MSG;
+				
+				this.render();
+				
 				GA.addClass( GA.one( EMAIL_INPUT_SELECTOR, this.container ), INPUT_ERROR_CLASS );
-				emailValid = false;				
+				return;			
 			}
 			else
 			{
 				GA.removeClass( GA.one( EMAIL_INPUT_SELECTOR, this.container ), INPUT_ERROR_CLASS );
-				emailValid = true;
 			}
 				
-			if ( !this.validatePasswordInput() )
+			if ( !GA.validatePasswordInput( this.getPassword() ) )
 			{
+				this.errorMessage = INVALID_PASSWORD_ERROR_MSG;
+				
+				this.render();
+				
 				GA.addClass( GA.one( PASSWORD_INPUT_SELECTOR, this.container ), INPUT_ERROR_CLASS );
-				passwordValid = false;				
+				return;
 			}
 			else
 			{
 				GA.removeClass( GA.one( PASSWORD_INPUT_SELECTOR, this.container ), INPUT_ERROR_CLASS );
-				passwordValid = true;
 			}
 			
-			if ( !emailValid || !passwordValid )
-				return;
-				
 			//Call login system
-			GA.Ajax.login( this.getEmail(), this.getPassword(), function(){
-				//On success, hide Sign in and Sign up labels on Menu
-			}, function(){
-				//On error, activate error msg
-			} );
+			this.ajax.login( this.getEmail(), this.getPassword(), GA.bind(function(){
+				window.location.href = "home";
+			}, this), GA.bind(function(){
+				this.errorMessage = INVALID_LOGIN_ERROR_MSG;
+				this.render();
+				
+				GA.addClass( GA.one( EMAIL_INPUT_SELECTOR, this.container ), INPUT_ERROR_CLASS );
+				GA.addClass( GA.one( PASSWORD_INPUT_SELECTOR, this.container ), INPUT_ERROR_CLASS );
+			}, this) );
 		},
 		
-		onLostPasswordClick: function( evt )
+		onHomeClick: function( evt )
 		{
-			
+			//Redirect to Home page and change state
+			window.location.href = "home";
+			this.sendMessage("changeState", { state: GA.App.States.HOME });
+		},
+		
+		onRegisterClick: function( evt )
+		{
+			//Redirect to Register page and change state
+			window.location.href = "register";
+			this.sendMessage("changeState", { state: GA.App.States.REGISTER });
 		}
 		
 	});

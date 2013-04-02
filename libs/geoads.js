@@ -256,6 +256,92 @@
 
 (function( GA )
 {
+	/**
+	 * Ajax class is used to make XHR requests.
+	 * 
+	 * @class Ajax
+	 * @module core
+	 * @version 0.1.0
+	 * 
+	 * @constructor Ajax
+	 */
+	var ajaxManager = null;
+	var AjaxManager = new Class({
+		
+		geoAdsPlatformUrl: "http://127.0.0.1:1314/",
+		
+		login: function( email, password, success, error )
+		{
+			var url = this.geoAdsPlatformUrl + "login";
+			var data = "email=" + email + "&" + "password=" + password;
+			
+			jQuery.ajax({
+		    	url: url,
+		    	type: 'POST',
+		    	data: data,
+		    	success: GA.bind(function( data ){
+		    		if ( data.GreatSuccess == false )
+		    			error.apply( this, [] );
+		    		else
+		    		{
+		    			success.apply( this, [data] );
+		    		}
+		            	
+		    	}, this)
+		    });
+		},
+		
+		saveAd: function( name, description, radius, lat, lon, success, error )
+		{
+			if ( !name || !description || !radius || !lat || !lon && error)
+			{
+				error.apply( this, [] );
+				return;
+			}
+			
+			var url = this.geoAdsPlatformUrl + "/ads/save";
+			var data = "name=" + name + "&" +
+					   "description=" + description + "&" +
+					   "radius=" + radius + "&" +
+					   "lat=" + lat + "&" +
+					   "lon=" + lon;
+			
+			jQuery.ajax({
+		    	url: url,
+		    	type: 'POST',
+		    	data: data,
+		    	success: GA.bind(function( data ){
+		    		
+		    		if ( !data || !data.GreatSuccess && error)
+		    			error.apply( this, [] );
+		    		else if( success )
+		            	success.apply( this, [] );
+		    	}, this),
+		    	error: GA.bind(function( data ){
+		    		if( error )
+		            	error.apply( this, [] );
+		    	}, this)
+		    });
+		}
+	});
+	
+	AjaxManager.getInstance = function()
+	{
+		if( ajaxManager )
+			return ajaxManager;
+		
+		ajaxManager = new AjaxManager();
+		return ajaxManager;
+	};
+	
+	// Create & add an instance of ajax to GeoAds namespace
+	GA.AjaxManager = AjaxManager;
+	
+})(GA);
+
+
+(function( GA )
+{
 	// Singleton instance
 	var adManager = null;
 	var AdManager = new Class({
@@ -265,6 +351,7 @@
 		
 		init: function()
 		{
+			this.ajax = GA.AjaxManager.getInstance();
 		},
 		
 		setAdMapSettings: function( adCenter, adRadius )
@@ -290,52 +377,14 @@
 		//GeoAds Platform communication
 		saveAd: function()
 		{
-			if ( !this.ad || !this.ad.center || !this.ad.radius || !this.ad.name )
+			if ( !this.ad || !this.ad.center || !this.ad.radius || !this.ad.name || !this.ad.description)
 				return;
 				
-			var url = this.geoAdsPlatformUrl + "savead/";
-			
-			//Ad Name
-			url += this.ad.name + "/";
-			
-			//Ad Center (lat and lon)
-			url += this.ad.center.lat + "/" + this.ad.center.lon + "/";
-			
-			//Ad radius
-			url += this.ad.radius;
-			
-			var cfg = {
-		        method: 'GET',
-		        on: {
-		        	success: GA.bind( function( data ) {
-		        		
-		        		alert("Great success!");
-		        		
-		        		// if( success )
-		        			// success.apply( this, [ M.JSON.parse(data) ] );
-		        		
-		        	}, this),
-		        	error: function ( error )
-		        	{
-		        		console.log(error);
-		        	}
-		        },
-		        headers: [ { name:"Content-Type", value:"text/plain"} ]
-		    };
-		
-		    // Send request
-		    if ( !GA.ajax )
-		        throw new Error("Ajax function is not defined");
-			    
-		    //GA.ajax(url, cfg);
-		    jQuery.ajax({
-		    	url: url,
-		    	type: 'GET',
-		    	success: function(res)
-		    	{
-		    		alert("Great Success");
-		    	}
-		    });
+			this.ajax.saveAd( this.ad.name, this.ad.description, this.ad.radius, this.ad.center.lat, this.ad.center.lon, function(){
+				alert("Save ad Success!");
+			}, function(){
+				alert("Save ad Fail!")
+			} );
 		}
 	});	
 
@@ -372,7 +421,7 @@
 			this.formatRenderData = cfg.formatRenderData;
 			this.dataManager = GA.DataManager.getInstance();
 			this.adManager = GA.AdManager.getInstance();
-			this.ajax = GA.ajax;
+			this.ajax = GA.AjaxManager.getInstance();
 			
 			this.events = GA.extend( this.events || {}, cfg.events || {} );
 			
@@ -451,10 +500,12 @@
 
 (function( GA )
 {
+	var PUBLISH_ZOOM = 17;
 	var MapView = GA.View.extend({
 		
 		map: null,
 		maxRadius: 2000,
+		zoom: PUBLISH_ZOOM,
 		
 		events: {
 			"#next-step":{
@@ -468,12 +519,13 @@
 			this._parent( cfg );
 			
 			this.dataManager.on('userGeocoded', GA.bind( this.onUserGeocoded, this));
+			this.dataManager.on('userNotGeocoded', GA.bind( this.onUserNotGeocoded, this));
 			
 			this.markerInfo = cfg.markerInfo || {
 				url: "images/orange-pin.png",
 				position: { 
-					lat: 45.757284,
-					lng: 21.228633
+					lat: 15,
+					lng: 0
 				}
 			};
 			
@@ -550,7 +602,7 @@
 			this.centerAndZoom( {
 				lat: this.markerInfo.position.lat,
 				lon: this.markerInfo.position.lng
-			}, 17 ); 
+			}, this.zoom ); 
 			
 			this.drawCoverage();
 			
@@ -625,7 +677,9 @@
 		{
 			if ( !msg || !msg.lat || !msg.lon )
 				return;
-				
+			
+			this.zoom = PUBLISH_ZOOM;
+			
 			var markerInfo = {};
 			
 			markerInfo.url = this.markerInfo.url;
@@ -640,7 +694,9 @@
 		{
 			if ( !msg || !msg.lat || !msg.lon )
 				return;
-				
+			
+			this.zoom = PUBLISH_ZOOM;
+			
 			var markerInfo = {};
 			
 			markerInfo.url = this.markerInfo.url;
@@ -651,6 +707,14 @@
 			this.drawMarker( markerInfo );
 		},
 		
+		/*
+		 * If user was not geocoded set the map to default position
+		 */
+		onUserNotGeocoded: function( msg )
+		{
+			this.zoom = 3;
+		},
+		
 		onResizeMap: function( msg )
 		{
 			google.maps.event.trigger(this.map, "resize");
@@ -659,7 +723,7 @@
 			this.centerAndZoom( {
 				lat: this.markerInfo.position.lat,
 				lon: this.markerInfo.position.lng
-			}, 17 );
+			}, this.zoom );
 		},
 		
 		/*
@@ -671,7 +735,7 @@
 			//Save the configured ad and move to the Info View
 			
 			var markerPosition  = this.marker.getPosition();
-			var adCoverage = this.adCoverage.getRadius();
+			var adCoverage = Math.round(this.adCoverage.getRadius());
 			
 			//Save
 			this.adManager.setAdMapSettings( { lat: markerPosition.lat(), lon: markerPosition.lng() }, adCoverage );
@@ -778,6 +842,7 @@
 				
 				case "login-item":
 				{
+					window.location.href = "login";
 					this.sendMessage("changeState", {
 						state: GA.App.States.LOGIN
 					});
@@ -787,6 +852,7 @@
 				
 				case "register-item":
 				{
+					window.location.href = "register";
 					this.sendMessage("changeState", {
 						state: GA.App.States.REGISTER
 					});
@@ -987,10 +1053,17 @@
 
 (function( GA )
 {
+	//Selectors
 	var EMAIL_INPUT_SELECTOR = "#login-email";
 	var PASSWORD_INPUT_SELECTOR = "#login-pass";
+	
+	//Classes
 	var INPUT_ERROR_CLASS = "input-error";
-	var LOGIN_ERROR_MSG = "";
+	
+	//Messages
+	var INVALID_EMAIL_ERROR_MSG = "The e-mail is not valid!";
+	var INVALID_PASSWORD_ERROR_MSG = "The password is not valid!";
+	var INVALID_LOGIN_ERROR_MSG = "Sorry, your email or password are not valid!"
 	
 	var LoginView = GA.View.extend({
 		
@@ -1001,8 +1074,11 @@
 			"#lostBtn":{
 				click: "onLostPasswordClick"
 			},
-			"#closeBtn":{
-				click: "onCloseAccountClick"
+			".login-icon":{
+				click: "onHomeClick"
+			},
+			"#registerBtn":{
+				click: "onRegisterClick"
 			}
 		},
 		
@@ -1018,7 +1094,9 @@
 		
 		render: function( template )
 		{
-			this.container.innerHTML = this.mustache( this.templates.main, {});
+			this.container.innerHTML = this.mustache( this.templates.main, {
+				errorMessage: this.errorMessage
+			});
 			
 			return this;
 		},
@@ -1033,28 +1111,6 @@
 			return GA.one( PASSWORD_INPUT_SELECTOR, this.container ).value;
 		},
 		
-		validateEmailInput: function()
-		{
-			var email = this.getEmail();
-			
-			if ( email == "" )
-				return false;
-				
-			var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-			
-			return re.test(email);
-		},
-		
-		validatePasswordInput: function()
-		{
-			var password = this.getPassword();
-			
-			if ( password == "" )
-				return false;
-			
-			return true;
-		},
-		
 		/*
 		 * Messages
 		 */
@@ -1064,48 +1120,60 @@
 		 * Events
 		 */
 		
-		onCloseAccountClick: function( evt )
-		{
-			this.sendMessage("changeState", { state: GA.App.States.HOME });
-		},
-		
 		onLoginSubmitClick: function( evt )
 		{
-			var emailValid = false;
-			var passwordValid = false;
-			
-			if ( !this.validateEmailInput() )
+			if ( !GA.validateEmailInput( this.getEmail() ) )
 			{
+				this.errorMessage = INVALID_EMAIL_ERROR_MSG;
+				
+				this.render();
+				
 				GA.addClass( GA.one( EMAIL_INPUT_SELECTOR, this.container ), INPUT_ERROR_CLASS );
-				emailValid = false;				
+				return;			
 			}
 			else
 			{
 				GA.removeClass( GA.one( EMAIL_INPUT_SELECTOR, this.container ), INPUT_ERROR_CLASS );
-				emailValid = true;
 			}
 				
-			if ( !this.validatePasswordInput() )
+			if ( !GA.validatePasswordInput( this.getPassword() ) )
 			{
+				this.errorMessage = INVALID_PASSWORD_ERROR_MSG;
+				
+				this.render();
+				
 				GA.addClass( GA.one( PASSWORD_INPUT_SELECTOR, this.container ), INPUT_ERROR_CLASS );
-				passwordValid = false;				
+				return;
 			}
 			else
 			{
 				GA.removeClass( GA.one( PASSWORD_INPUT_SELECTOR, this.container ), INPUT_ERROR_CLASS );
-				passwordValid = true;
 			}
 			
-			if ( !emailValid || !passwordValid )
-				return;
-				
 			//Call login system
-			GA.Ajax.login( this.getEmail(), this.getPassword() );
+			this.ajax.login( this.getEmail(), this.getPassword(), GA.bind(function(){
+				window.location.href = "home";
+			}, this), GA.bind(function(){
+				this.errorMessage = INVALID_LOGIN_ERROR_MSG;
+				this.render();
+				
+				GA.addClass( GA.one( EMAIL_INPUT_SELECTOR, this.container ), INPUT_ERROR_CLASS );
+				GA.addClass( GA.one( PASSWORD_INPUT_SELECTOR, this.container ), INPUT_ERROR_CLASS );
+			}, this) );
 		},
 		
-		onLostPasswordClick: function( evt )
+		onHomeClick: function( evt )
 		{
-			
+			//Redirect to Home page and change state
+			window.location.href = "home";
+			this.sendMessage("changeState", { state: GA.App.States.HOME });
+		},
+		
+		onRegisterClick: function( evt )
+		{
+			//Redirect to Register page and change state
+			window.location.href = "register";
+			this.sendMessage("changeState", { state: GA.App.States.REGISTER });
 		}
 		
 	});
@@ -1117,14 +1185,28 @@
 
 (function( GA )
 {
+	//Selectors
+	var EMAIL_INPUT_SELECTOR = "#register-email";
+	var PASSWORD_INPUT_SELECTOR = "#register-pass";
+	var PASSWORD_CONFIRM_INPUT_SELECTOR = "#register-pass-confirm";
+	var ERROR_MESSAGE_SELECTOR = ".error-message";
+	
+	//Classes
+	var INPUT_ERROR_CLASS = "input-error";
+	
+	//Messages
+	var INVALID_EMAIL_ERROR_MSG = "The e-mail is not valid!";
+	var INVALID_PASSWORD_ERROR_MSG = "The password is not valid!";
+	var PASSWORDS_MISMATCH_ERROR_MSG = "The passwords don't match!";
+	
 	var RegisterView = GA.View.extend({
 		
 		events: {
 			"#registerBtn":{
 				click: "onRegisterSubmitClick"
 			},
-			"#closeBtn":{
-				click: "onCloseAccountClick"
+			".login-icon":{
+				click: "onHomeClick"
 			}
 		},
 		
@@ -1140,9 +1222,37 @@
 		
 		render: function( template )
 		{
-			this.container.innerHTML = this.mustache( this.templates.main, {});
+			this.container.innerHTML = this.mustache( this.templates.main, {
+				errorMessage: this.errorMessage
+			});
 			
 			return this;
+		},
+		
+		getEmail: function()
+		{
+			return GA.one( EMAIL_INPUT_SELECTOR, this.container ).value;
+		},
+		
+		getPassword: function()
+		{
+			return GA.one( PASSWORD_INPUT_SELECTOR, this.container ).value;
+		},
+		
+		getConfirmationPassword: function()
+		{
+			return GA.one( PASSWORD_CONFIRM_INPUT_SELECTOR, this.container ).value;
+		},
+		
+		samePasswords: function()
+		{
+			var password = this.getPassword();
+			var confirmationPassword = this.getConfirmationPassword();
+			
+			if ( password == confirmationPassword )
+				return true;
+			
+			return false;
 		},
 		
 		/*
@@ -1154,14 +1264,64 @@
 		 * Events
 		 */
 		
-		onCloseAccountClick: function( evt )
-		{
-			this.sendMessage("changeState", { state: GA.App.States.HOME });
-		},
-		
 		onRegisterSubmitClick: function( evt )
 		{
+			if ( !GA.validateEmailInput( this.getEmail() ) )
+			{
+				GA.addClass( GA.one( EMAIL_INPUT_SELECTOR, this.container ), INPUT_ERROR_CLASS );
+				this.errorMessage = INVALID_EMAIL_ERROR_MSG;
+				
+				this.render();
+				return;		
+			}
+			else
+			{
+				GA.removeClass( GA.one( EMAIL_INPUT_SELECTOR, this.container ), INPUT_ERROR_CLASS );
+			}
+				
+			if ( !GA.validatePasswordInput( this.getPassword() ) )
+			{
+				GA.addClass( GA.one( PASSWORD_INPUT_SELECTOR, this.container ), INPUT_ERROR_CLASS );
+				this.errorMessage = INVALID_PASSWORD_ERROR_MSG;
+				
+				this.render();
+				return;
+			}
+			else
+			{
+				GA.removeClass( GA.one( PASSWORD_INPUT_SELECTOR, this.container ), INPUT_ERROR_CLASS );
+			}
 			
+			if ( !GA.validatePasswordInput( this.getConfirmationPassword() ) )
+			{
+				GA.addClass( GA.one( PASSWORD_CONFIRM_INPUT_SELECTOR, this.container ), INPUT_ERROR_CLASS );
+				this.errorMessage = INVALID_PASSWORD_ERROR_MSG;
+				
+				this.render();
+				return;
+			}
+			else
+			{
+				GA.removeClass( GA.one( PASSWORD_CONFIRM_INPUT_SELECTOR, this.container ), INPUT_ERROR_CLASS );
+			}
+			
+			if ( !this.samePasswords() )
+			{
+				this.errorMessage = PASSWORDS_MISMATCH_ERROR_MSG;
+				this.render();
+				return;
+			}
+			else
+			{
+				
+			}
+		},
+		
+		onHomeClick: function( evt )
+		{
+			//Redirect to home and change state
+			window.location.href = "home";
+			this.sendMessage("changeState", { state: GA.App.States.HOME });
 		}
 		
 	});

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>GeoAds - the power of Where</title>
+		
+		<!-- Icon -->
+		<link rel="icon" href="images/favicon.ico" />
+		
+		<!-- Style -->
+		<link rel="stylesheet" type="text/css" href="style/main.css">
+	    <link rel="stylesheet" type="text/css" href="style/grids-min.css">
+	    <link rel="stylesheet" type="text/css" href="style/cssreset-min.css">
+	    <link rel="stylesheet" type="text/css" href="style/bootstrap.css">
+	    <link rel="stylesheet" type="text/css" href="style/flat-ui.css">
+	    
+	    <!-- Google Maps -->
+    	<script type="text/javascript" src="http://maps.google.com/maps/api/js?v=3.3&sensor=false&language=en"></script>
+	    
+	    
+	    <script type="text/javascript" src="libs/jquery-1.7.2.min.js"></script>
+	    <script type="text/javascript" src="libs/js.class.js"></script>
+		<script type="text/javascript" src="libs/geoads.jquery.js"></script>
+		<script type="text/javascript" src="libs/geoads.js"></script>
+		<script type="text/javascript" src="libs/mustache.js"></script>
+		<script type="text/javascript" src="libs/jsonp.js"></script>
+		<script type="text/javascript" src="libs/geoads.helpers.js"></script>
+	    
+		<!-- Font -->
+	    <link href='http://fonts.googleapis.com/css?family=Alfa+Slab+One' rel='stylesheet' type='text/css'>
+		
+		<!-- Script -->
+		<script>
+	
+			(function( $j )
+			{
+				$j(document).ready( function(){
+					
+					/** App **/
+					var app = new GA.App({
+						state: GA.App.States.REGISTER,
+						views: [
+							/*
+							 * Register View
+							 */
+							new GA.RegisterView({
+								container: GA.one("#register"),
+								hideOnStates: [ GA.App.States.HOME, GA.App.States.LOGIN ],
+								templates: {
+									main: $j.trim( GA.one("#register-tpl").innerHTML )
+								}
+							})
+							
+						]
+					});
+	
+					app.start();
+				});
+				
+			})(jQuery.noConflict());
+			
+		</script>	
+		
+	</head>
+	<body>
+		
+		<div class="register-page">
+			<div id="register"></div>
+		</div>
+		
+		<!-- Templates -->
+		
+		<script id="register-tpl" type="text/template">
+			<div class="login-icon">
+	            <img src="images/register-icon.png" alt="Welcome to GeoAds">
+	            <h4>Welcome to <small>GeoAds</small></h4>
+          	</div>
+	          <div class="login-form">
+	            <div class="control-group">
+	              <input id="register-email" type="text" class="login-field" value="" placeholder="Enter your email">
+	              <label class="login-field-icon fui-man-16" for="login-name"></label>
+	            </div>
+	
+	            <div class="control-group">
+	              <input id="register-pass" type="password" class="login-field" value="" placeholder="Password">
+	              <label class="login-field-icon fui-lock-16" for="login-pass"></label>
+	            </div>
+	            
+	            <div class="control-group">
+	              <input id="register-pass-confirm" type="password" class="login-field" value="" placeholder="Confirm Password">
+	              <label class="login-field-icon fui-lock-16" for="login-pass"></label>
+	            </div>
+				
+				{{#errorMessage}}
+					<div class="error-message">{{errorMessage}}</div>
+				{{/errorMessage}}
+				
+	            <a id="registerBtn" class="btn btn-primary btn-large btn-block" href="#">Sign up</a>
+	          </div>
+		</script>
+		
+	</body>
+</html>

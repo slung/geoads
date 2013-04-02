@@ -9,6 +9,7 @@
 		
 		init: function()
 		{
+			this.ajax = GA.AjaxManager.getInstance();
 		},
 		
 		setAdMapSettings: function( adCenter, adRadius )
@@ -34,52 +35,14 @@
 		//GeoAds Platform communication
 		saveAd: function()
 		{
-			if ( !this.ad || !this.ad.center || !this.ad.radius || !this.ad.name )
+			if ( !this.ad || !this.ad.center || !this.ad.radius || !this.ad.name || !this.ad.description)
 				return;
 				
-			var url = this.geoAdsPlatformUrl + "savead/";
-			
-			//Ad Name
-			url += this.ad.name + "/";
-			
-			//Ad Center (lat and lon)
-			url += this.ad.center.lat + "/" + this.ad.center.lon + "/";
-			
-			//Ad radius
-			url += this.ad.radius;
-			
-			var cfg = {
-		        method: 'GET',
-		        on: {
-		        	success: GA.bind( function( data ) {
-		        		
-		        		alert("Great success!");
-		        		
-		        		// if( success )
-		        			// success.apply( this, [ M.JSON.parse(data) ] );
-		        		
-		        	}, this),
-		        	error: function ( error )
-		        	{
-		        		console.log(error);
-		        	}
-		        },
-		        headers: [ { name:"Content-Type", value:"text/plain"} ]
-		    };
-		
-		    // Send request
-		    if ( !GA.ajax )
-		        throw new Error("Ajax function is not defined");
-			    
-		    //GA.ajax(url, cfg);
-		    jQuery.ajax({
-		    	url: url,
-		    	type: 'GET',
-		    	success: function(res)
-		    	{
-		    		alert("Great Success");
-		    	}
-		    });
+			this.ajax.saveAd( this.ad.name, this.ad.description, this.ad.radius, this.ad.center.lat, this.ad.center.lon, function(){
+				alert("Save ad Success!");
+			}, function(){
+				alert("Save ad Fail!")
+			} );
 		}
 	});	
 

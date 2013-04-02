@@ -37,17 +37,8 @@
 					
 					/** App **/
 					var app = new GA.App({
-						state: GA.App.States.HOME,
+						state: GA.App.States.MAP,
 						views: [
-							/*
-							 * Home View
-							 */
-							new GA.HomeView({
-								container: GA.one("#home"),
-								templates: {
-									main: $j.trim( GA.one("#home-tpl").innerHTML )
-								}
-							}),
 							/*
 							 * Menu View
 							 */
@@ -113,11 +104,7 @@
 		
 		<div class="page">
 			<div id="menu"></div>
-			<div id="home"></div>
-			<div id="steps"></div>
 			<div id="search"></div>
-			<div id="login"></div>
-			<div id="register"></div>
 			<div id="map">
 				<div id="next-step" class="yui3-u" title="Next Step"></div>
 				<div id="map-container"></div>
@@ -127,19 +114,10 @@
 		
 		<!-- Templates -->
 		
-		<!-- Home View -->
-		<script id="home-tpl" type="text/template">
-			
-		</script>
-		
 		<!-- Menu View -->
 		<script id="menu-tpl" type="text/template">
 			<div class="menu-container">
 				<div id="home-item" class="yui3-u logo menu-item">GeoAds</div>
-				<div id="login-item" class="yui3-u menu-item">Sign in</div>
-				<div id="register-item" class="yui3-u menu-item">Sign up</div>
-				<div id="publish-item" class="yui3-u menu-item">Publish</div>
-				<div id="about-item" class="yui3-u menu-item">About</div>
 			</div>
 		</script>
 		
@@ -162,47 +140,6 @@
 				<input id="keywords" type="text" maxlength="25" placeholder="Add keywords describing your company (visible to users)"/>
 				<a id="publish" href="#" class="btn btn-large btn-block btn-info">Put me on the map</a>
 			</div>
-		</script>
-		
-		<!-- Account View -->
-		<script id="login-tpl" type="text/template">
-	          <div class="login-form">
-	          	<img id="closeBtn" src="images/close.png"/>
-	            <div class="control-group">
-	              <input type="text" class="login-field" value="" placeholder="Enter your email" id="login-email">
-	              <label class="login-field-icon fui-man-16" for="login-name"></label>
-	            </div>
-	
-	            <div class="control-group">
-	              <input type="password" class="login-field" value="" placeholder="Password" id="login-pass">
-	              <label class="login-field-icon fui-lock-16" for="login-pass"></label>
-	            </div>
-	
-	            <a id="loginBtn" class="btn btn-primary btn-large btn-block" href="#">Sign in</a>
-	            <a id="lostBtn" class="login-link" href="#">Lost your password?</a>
-	          </div>
-		</script>
-		
-		<script id="register-tpl" type="text/template">
-	          <div class="login-form">
-	          	<img id="closeBtn" src="images/close.png"/>
-	            <div class="control-group">
-	              <input type="text" class="login-field" value="" placeholder="Enter your email" id="login-name">
-	              <label class="login-field-icon fui-man-16" for="login-name"></label>
-	            </div>
-	
-	            <div class="control-group">
-	              <input id="register-pass" type="password" class="login-field" value="" placeholder="Password">
-	              <label class="login-field-icon fui-lock-16" for="login-pass"></label>
-	            </div>
-	            
-	            <div class="control-group">
-	              <input id="register-pass-confirm" type="password" class="login-field" value="" placeholder="Confirm Password">
-	              <label class="login-field-icon fui-lock-16" for="login-pass"></label>
-	            </div>
-	
-	            <a id="registerBtn" class="btn btn-primary btn-large btn-block" href="#">Sign up</a>
-	          </div>
 		</script>
 		
 	</body>

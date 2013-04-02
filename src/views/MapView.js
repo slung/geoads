@@ -1,9 +1,11 @@
 (function( GA )
 {
+	var PUBLISH_ZOOM = 17;
 	var MapView = GA.View.extend({
 		
 		map: null,
 		maxRadius: 2000,
+		zoom: PUBLISH_ZOOM,
 		
 		events: {
 			"#next-step":{
@@ -17,12 +19,13 @@
 			this._parent( cfg );
 			
 			this.dataManager.on('userGeocoded', GA.bind( this.onUserGeocoded, this));
+			this.dataManager.on('userNotGeocoded', GA.bind( this.onUserNotGeocoded, this));
 			
 			this.markerInfo = cfg.markerInfo || {
 				url: "images/orange-pin.png",
 				position: { 
-					lat: 45.757284,
-					lng: 21.228633
+					lat: 15,
+					lng: 0
 				}
 			};
 			
@@ -99,7 +102,7 @@
 			this.centerAndZoom( {
 				lat: this.markerInfo.position.lat,
 				lon: this.markerInfo.position.lng
-			}, 17 ); 
+			}, this.zoom ); 
 			
 			this.drawCoverage();
 			
@@ -174,7 +177,9 @@
 		{
 			if ( !msg || !msg.lat || !msg.lon )
 				return;
-				
+			
+			this.zoom = PUBLISH_ZOOM;
+			
 			var markerInfo = {};
 			
 			markerInfo.url = this.markerInfo.url;
@@ -189,7 +194,9 @@
 		{
 			if ( !msg || !msg.lat || !msg.lon )
 				return;
-				
+			
+			this.zoom = PUBLISH_ZOOM;
+			
 			var markerInfo = {};
 			
 			markerInfo.url = this.markerInfo.url;
@@ -200,6 +207,14 @@
 			this.drawMarker( markerInfo );
 		},
 		
+		/*
+		 * If user was not geocoded set the map to default position
+		 */
+		onUserNotGeocoded: function( msg )
+		{
+			this.zoom = 3;
+		},
+		
 		onResizeMap: function( msg )
 		{
 			google.maps.event.trigger(this.map, "resize");
@@ -208,7 +223,7 @@
 			this.centerAndZoom( {
 				lat: this.markerInfo.position.lat,
 				lon: this.markerInfo.position.lng
-			}, 17 );
+			}, this.zoom );
 		},
 		
 		/*
@@ -220,7 +235,7 @@
 			//Save the configured ad and move to the Info View
 			
 			var markerPosition  = this.marker.getPosition();
-			var adCoverage = this.adCoverage.getRadius();
+			var adCoverage = Math.round(this.adCoverage.getRadius());
 			
 			//Save
 			this.adManager.setAdMapSettings( { lat: markerPosition.lat(), lon: markerPosition.lng() }, adCoverage );
