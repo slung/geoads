@@ -291,6 +291,27 @@
 		    });
 		},
 		
+		register: function( email, password, success, error )
+		{
+			var url = this.geoAdsPlatformUrl + "register";
+			var data = "email=" + email + "&" + "password=" + password;
+			
+			jQuery.ajax({
+		    	url: url,
+		    	type: 'POST',
+		    	data: data,
+		    	success: GA.bind(function( data ){
+		    		if ( data.GreatSuccess == false )
+		    			error.apply( this, [] );
+		    		else
+		    		{
+		    			success.apply( this, [data] );
+		    		}
+		            	
+		    	}, this)
+		    });
+		},
+		
 		saveAd: function( name, description, radius, lat, lon, success, error )
 		{
 			if ( !name || !description || !radius || !lat || !lon && error)
@@ -780,7 +801,9 @@
 		
 		render: function()
 		{
-			this.container.innerHTML = this.mustache( this.templates.main, {});
+			this.container.innerHTML = this.mustache( this.templates.main, {
+				client: GA.client
+			});
 			
 			return this;
 		},
@@ -1151,15 +1174,20 @@
 			}
 			
 			//Call login system
-			this.ajax.login( this.getEmail(), this.getPassword(), GA.bind(function(){
-				window.location.href = "home";
-			}, this), GA.bind(function(){
-				this.errorMessage = INVALID_LOGIN_ERROR_MSG;
-				this.render();
+			this.ajax.login( this.getEmail(), this.getPassword(), 
+				GA.bind(function( dataArray )
+				{
+					window.location.href = "home";
+				}, this),
+				GA.bind(function()
+				{
+					this.errorMessage = INVALID_LOGIN_ERROR_MSG;
+					this.render();
 				
-				GA.addClass( GA.one( EMAIL_INPUT_SELECTOR, this.container ), INPUT_ERROR_CLASS );
-				GA.addClass( GA.one( PASSWORD_INPUT_SELECTOR, this.container ), INPUT_ERROR_CLASS );
-			}, this) );
+					GA.addClass( GA.one( EMAIL_INPUT_SELECTOR, this.container ), INPUT_ERROR_CLASS );
+					GA.addClass( GA.one( PASSWORD_INPUT_SELECTOR, this.container ), INPUT_ERROR_CLASS );
+				}, this) 
+			);
 		},
 		
 		onHomeClick: function( evt )
@@ -1311,10 +1339,13 @@
 				this.render();
 				return;
 			}
-			else
-			{
-				
-			}
+			
+			//Call registering system
+			this.ajax.register( this.getEmail(), this.getPassword(), GA.bind(function(){
+				window.location.href = "login";
+			}, this), GA.bind(function(){
+				alert("Register Fail!");
+			}, this) );
 		},
 		
 		onHomeClick: function( evt )

@@ -126,10 +126,13 @@
 				this.render();
 				return;
 			}
-			else
-			{
-				
-			}
+			
+			//Call registering system
+			this.ajax.register( this.getEmail(), this.getPassword(), GA.bind(function(){
+				window.location.href = "login";
+			}, this), GA.bind(function(){
+				alert("Register Fail!");
+			}, this) );
 		},
 		
 		onHomeClick: function( evt )

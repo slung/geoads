@@ -27,7 +27,9 @@
 		
 		render: function()
 		{
-			this.container.innerHTML = this.mustache( this.templates.main, {});
+			this.container.innerHTML = this.mustache( this.templates.main, {
+				client: GA.client
+			});
 			
 			return this;
 		},

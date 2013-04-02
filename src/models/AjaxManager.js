@@ -35,6 +35,27 @@
 		    });
 		},
 		
+		register: function( email, password, success, error )
+		{
+			var url = this.geoAdsPlatformUrl + "register";
+			var data = "email=" + email + "&" + "password=" + password;
+			
+			jQuery.ajax({
+		    	url: url,
+		    	type: 'POST',
+		    	data: data,
+		    	success: GA.bind(function( data ){
+		    		if ( data.GreatSuccess == false )
+		    			error.apply( this, [] );
+		    		else
+		    		{
+		    			success.apply( this, [data] );
+		    		}
+		            	
+		    	}, this)
+		    });
+		},
+		
 		saveAd: function( name, description, radius, lat, lon, success, error )
 		{
 			if ( !name || !description || !radius || !lat || !lon && error)

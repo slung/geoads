@@ -98,15 +98,20 @@
 			}
 			
 			//Call login system
-			this.ajax.login( this.getEmail(), this.getPassword(), GA.bind(function(){
-				window.location.href = "home";
-			}, this), GA.bind(function(){
-				this.errorMessage = INVALID_LOGIN_ERROR_MSG;
-				this.render();
+			this.ajax.login( this.getEmail(), this.getPassword(), 
+				GA.bind(function( dataArray )
+				{
+					window.location.href = "home";
+				}, this),
+				GA.bind(function()
+				{
+					this.errorMessage = INVALID_LOGIN_ERROR_MSG;
+					this.render();
 				
-				GA.addClass( GA.one( EMAIL_INPUT_SELECTOR, this.container ), INPUT_ERROR_CLASS );
-				GA.addClass( GA.one( PASSWORD_INPUT_SELECTOR, this.container ), INPUT_ERROR_CLASS );
-			}, this) );
+					GA.addClass( GA.one( EMAIL_INPUT_SELECTOR, this.container ), INPUT_ERROR_CLASS );
+					GA.addClass( GA.one( PASSWORD_INPUT_SELECTOR, this.container ), INPUT_ERROR_CLASS );
+				}, this) 
+			);
 		},
 		
 		onHomeClick: function( evt )
