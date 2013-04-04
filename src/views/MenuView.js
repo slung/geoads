@@ -74,7 +74,7 @@
 			{
 				case "home-item":
 				{
-					window.location.href = "home";
+					window.location.href = "/home";
 					this.sendMessage("changeState", {
 						state: GA.App.States.HOME
 					});
@@ -84,7 +84,7 @@
 				
 				case "login-item":
 				{
-					window.location.href = "login";
+					window.location.href = "/login";
 					this.sendMessage("changeState", {
 						state: GA.App.States.LOGIN
 					});
@@ -92,9 +92,16 @@
 					break;
 				}
 				
+				case "logout-item":
+				{
+					window.location.href = "/logout";
+					
+					break;
+				}
+				
 				case "register-item":
 				{
-					window.location.href = "register";
+					window.location.href = "/register";
 					this.sendMessage("changeState", {
 						state: GA.App.States.REGISTER
 					});
@@ -111,7 +118,7 @@
 				
 				case "new-ad-item":
 				{
-					window.location.href = "ads/create";
+					window.location.href = "/ads/create";
 					
 					break;
 				}

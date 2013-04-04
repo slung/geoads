@@ -136,5 +136,6 @@
 	GA.App.States.INFO = 'info';
 	GA.App.States.LOGIN = 'login';
 	GA.App.States.REGISTER = 'register';
+	GA.App.States.NO_ADS = 'noads';
 	
 }(GA));

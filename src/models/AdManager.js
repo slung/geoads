@@ -39,7 +39,7 @@
 				return;
 				
 			this.ajax.saveAd( this.ad.name, this.ad.description, this.ad.radius, this.ad.center.lat, this.ad.center.lon, function(){
-				window.location.href = "ads";
+				window.location.href = "/ads";
 			}, function(){
 				window.location.href = "home";
 			} );

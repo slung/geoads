@@ -44,8 +44,7 @@
 						Description: "Second Ad Description",
 						Lat: 43.7555389404297,
 						Lon: 27.2374992370605,
-						Radius: 200,
-						selected: true
+						Radius: 200
 			},{
 						index: 2,
 						Name: "Third Ad",
@@ -77,16 +76,31 @@
 							 */
 							new GA.AdsView({
 								container: GA.one("#ads"),
-								ads: ads,
+								//ads: ads,
 								templates: {
-									main: $j.trim( GA.one("#ads-tpl").innerHTML )
+									main: $j.trim( GA.one("#ads-tpl").innerHTML ),
+									noAds: $j.trim( GA.one("#no-ads-tpl").innerHTML ) 
 								}
-							})
+							}),
+							/*
+							 * Map View
+							 */
+							new GA.MapView({
+								container: GA.one("#map"),
+								renderContainer: GA.one("#map"),
+								hideOnStates: [ GA.App.States.HOME, GA.App.States.NO_ADS ],
+								zoom: 3,
+								alwaysRefreshMarker: true,
+								editableElements: false,
+								markerIconUrl: "images/grey-blue-pin-48.png",
+								templates: {
+								}	
+							}),
 						]
 					});
 	
 					app.start();
-					
+							
 					//GeolocateUser
 					GA.DataManager.getInstance().geolocateUser();
 				});
@@ -98,9 +112,10 @@
 	</head>
 	<body>
 		
-		<div class="page">
+		<div class="ads-page">
 			<div id="menu"></div>
 			<div id="ads"></div>
+			<div id="map"></div>
 		</div>
 		
 		<!-- Templates -->
@@ -114,9 +129,9 @@
 		
 		<!-- Ads View -->
 		<script id="ads-tpl" type="text/template">
-			<div id="ads-list" class="yui3-u">
+			<div id="ads-container">
 				{{#ads}}
-					<div id="ad-{{index}}" class="ad {{#selected}}selected{{/selected}}">
+					<div id="ad-{{index}}" class="ad">
 						<div id="ad-info">
 							<div id="name">{{Name}}</div>
 							<div id="description">{{Description}}</div>
@@ -128,7 +143,11 @@
 					</div>
 				{{/ads}}
 			</div>
-			<div id="map"></div>
+		</script>
+		
+		<script id="no-ads-tpl" type="text/template">
+			<div class="msg">Oh no....it appears that you haven't created any Ads!</div>
+			<div class="msg">You can start by <a href="ads/create">creating a new Ad.</a></div>
 		</script>
 	</body>
 </html>

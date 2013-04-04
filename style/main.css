@@ -44,7 +44,7 @@ body
  * Menu
  */
 
-.page #menu
+#menu
 {
 	position: absolute;
 	top: 0;
@@ -56,7 +56,7 @@ body
 /*	background: url('../images/header-bg.png') repeat-x;*/
 }
 
-.page #menu .menu-item
+#menu .menu-item
 {
 	/*font-family: 'Alfa Slab One', cursive;*/
 	font-family: 'Lato', sans-serif;
@@ -68,60 +68,91 @@ body
 	vertical-align: middle;
 }
 
-.page #menu .menu-item:hover
+#menu .menu-item:hover
 {
 	opacity: 0.8;
 }
 
-.page #menu #home-item
+#menu #home-item
 {
 	margin-right: 20px;
 }
 
-.page #menu .logo
+#menu .logo
 {
 	font-size: 39px;
 	font-weight: bold;
 	cursor: pointer;
 }
 
-.page #menu .logo.client-present
+#menu .logo.client-present
 {
 	font-size: 25px;
 }
 
-.page #menu .client
+#menu .client
 {
 	font-size: 14px;
 	font-weight: normal;
 }
 
 /*
- * Ads
+ * Home
  */
 
-.page #ads
+#home
 {
 	position: absolute;
 	top: 50px;
+	bottom: 0;
 	left: 0;
 	right: 0;
-	bottom: 0;
+	
+	padding: 30px;
+	text-align: center;
+}
+
+#home #welcome
+{
+	font-size: 50px;
+}
+
+#home .msg
+{
+	font-size: 30px;
+}
+
+/*
+ * Ads
+ */
+
+.ads-page #ads
+{
+	position: absolute;
+	top: 50px;
 	
 	font-family: 'Lato', sans-serif;
 	
-	padding: 30px;
-}
-
-.page #ads #ads-list
-{
-	width: 310px;
+	width: 370px;
 	height: 600px;
 	overflow-x: hidden;
 	overflow-y: auto;
 }
 
-.page #ads .ad
+.ads-page #ads #ads-container
+{
+	padding: 30px;
+}
+
+.ads-page #ads .msg
+{
+	text-align: center;
+	padding: 20px 0px;
+	
+	font-size: 40px;
+}
+
+.ads-page #ads .ad
 {
 	width: 285px;
 	border: 2px solid #00A4E4;
@@ -134,51 +165,56 @@ body
     border-radius: 10px;
 }
 
-.page #ads .ad:hover
+.ads-page #ads .ad:hover
 {
 	background-color:rgba(0,164,228,0.1);
 }
 
-.page #ads .ad.selected
+.ads-page #ads .ad.selected
 {
 	background-color:rgba(0,164,228,0.1);
 }
 
-.page #ads #ad-info
-{
-	
-}
-
-.page #ads #ad-info #name
+.ads-page #ads #ad-info #name
 {
 	font-size: 20px;
 	font-weight: bold;
 }
 
-.page #ads #ad-info #description
+.ads-page #ads #ad-info #description
 {
 	font-size: 13px;
 }
 
-.page #ads #buttons
+.ads-page #ads #buttons
 {
 	margin-top: 10px;
 }
 
-.page #ads #buttons .btn
+.ads-page #ads #buttons .btn
 {
 	width: 100px;
 	margin-right: 10px;
 }
 
-.page #ads #buttons .delete
+.ads-page #ads #buttons .delete
 {
 	background-color: #FF2133;
 }
 
-.page #ads #buttons .delete:hover
+.ads-page #ads #buttons .delete:hover
 {
 	background-color: #FF5664;
+}
+
+.ads-page #map
+{
+	position: absolute;
+	top: 80px;
+	left: 400px;
+	
+	width: 600px;
+	height: 600px;
 }
 
 /*

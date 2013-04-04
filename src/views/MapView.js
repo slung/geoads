@@ -6,6 +6,9 @@
 		map: null,
 		maxRadius: 2000,
 		zoom: PUBLISH_ZOOM,
+		alwaysRefreshMarker: false,
+		defaultRadius: 100,
+		editableElements: true,
 		
 		events: {
 			"#next-step":{
@@ -20,21 +23,25 @@
 			
 			this.dataManager.on('userGeocoded', GA.bind( this.onUserGeocoded, this));
 			this.dataManager.on('userNotGeocoded', GA.bind( this.onUserNotGeocoded, this));
+			this.markerIconUrl = cfg.markerIconUrl || "images/grey-blue-pin-48.png";
+			
 			
 			this.markerInfo = cfg.markerInfo || {
-				url: "images/orange-pin.png",
+				url: this.markerIconUrl,
+				radius: this.defaultRadius,
 				position: { 
 					lat: 15,
 					lng: 0
 				}
 			};
 			
-			this.radius = cfg.radius || 100;
-			
-			if ( this.radius > this.maxRadius )
-				this.radius = this.maxRadius;
+			if ( this.markerInfo.radius > this.maxRadius )
+				this.markerInfo.radius = this.maxRadius;
 			
 			this.startZoom = cfg.startZoom || 3;
+			
+			if ( cfg.editableElements == true || cfg.editableElements == false)
+				this.editableElements = cfg.editableElements;	
 		},
 		
 		register: function()
@@ -65,6 +72,14 @@
 			
 			this.map = new google.maps.Map( this.renderContainer, mapOptions );
 			
+			//Add MapReady listener
+			var listener = google.maps.event.addListener( this.map, 'tilesloaded', GA.bind( function( evt ) {
+				
+				this.sendMessage("mapReady");
+				
+				google.maps.event.removeListener(listener);
+			}, this ));
+			
 			return this;
 		},
 		
@@ -89,7 +104,7 @@
 			if ( !this.markerInfo )
 				return;
 			
-			if ( !this.marker )
+			if ( !this.marker || this.alwaysRefreshMarker)
 			{
 				this.createMarker( this.markerInfo );
 			}
@@ -125,7 +140,7 @@
 			this.marker = new google.maps.Marker({
 				map: this.map,
 				animation: google.maps.Animation.DROP,
-				draggable: true,
+				draggable: this.editableElements,
 				icon: markerInfo.url,
 				position: new google.maps.LatLng( markerInfo.position.lat, markerInfo.position.lng )
 			});
@@ -138,9 +153,9 @@
 			if ( !this.adCoverage )
 			{
 				this.adCoverage = new google.maps.Circle({
-					editable: true,
+					editable: this.editableElements,
 					center: center,
-					radius: this.radius,
+					radius: this.markerInfo.radius,
 					strokeColor: "#008CE4",
 				    strokeOpacity: 0.5,
 				    strokeWeight: 1,
@@ -186,6 +201,7 @@
 			markerInfo.position = {};
 			markerInfo.position.lat = msg.lat;
 			markerInfo.position.lng = msg.lon;
+			markerInfo.radius = msg.radius || this.defaultRadius;
 			
 			this.drawMarker( markerInfo );
 		},
