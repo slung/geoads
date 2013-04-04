@@ -39,9 +39,9 @@
 				return;
 				
 			this.ajax.saveAd( this.ad.name, this.ad.description, this.ad.radius, this.ad.center.lat, this.ad.center.lon, function(){
-				alert("Save ad Success!");
+				window.location.href = "ads";
 			}, function(){
-				alert("Save ad Fail!")
+				window.location.href = "home";
 			} );
 		}
 	});	

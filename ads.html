@@ -30,7 +30,31 @@
 		
 		<!-- Script -->
 		<script>
-	
+			
+			var ads = [{
+						index: 0,
+						Name: "First Ad",
+						Description: "First Ad Description",
+						Lat: 45.7555389404297,
+						Lon: 21.2374992370605,
+						Radius: 100
+			},{
+						index: 1,
+						Name: "Second Ad",
+						Description: "Second Ad Description",
+						Lat: 43.7555389404297,
+						Lon: 27.2374992370605,
+						Radius: 200,
+						selected: true
+			},{
+						index: 2,
+						Name: "Third Ad",
+						Description: "Thirs Ad Description",
+						Lat: 55.7555389404297,
+						Lon: 26.2374992370605,
+						Radius: 700
+			}];
+			
 			(function( $j )
 			{
 				$j(document).ready( function(){
@@ -49,42 +73,14 @@
 								}
 							}),
 							/*
-							 * Search View
+							 * Ads View
 							 */
-							new GA.SearchView({
-								container: GA.one("#search"),
-								hideOnStates: [ GA.App.States.HOME, GA.App.States.INFO, GA.App.States.LOGIN, GA.App.States.REGISTER ],
+							new GA.AdsView({
+								container: GA.one("#ads"),
+								ads: ads,
 								templates: {
-									main: $j.trim( GA.one("#search-tpl").innerHTML )
+									main: $j.trim( GA.one("#ads-tpl").innerHTML )
 								}
-							}),
-							/*
-							 * Map View
-							 */
-							new GA.MapView({
-								container: GA.one("#map"),
-								renderContainer: GA.one("#map-container"),
-								hideOnStates: [ GA.App.States.HOME, GA.App.States.INFO, GA.App.States.LOGIN, GA.App.States.REGISTER ],
-								zoom: 3,
-								markerInfo:{
-									url: "images/grey-blue-pin-48.png",
-									position: { 
-										lat: 29.312607001603343,
-										lng: -40.166015625
-									}
-								},
-								templates: {
-								}	
-							}),
-							/*
-							 * Info View
-							 */
-							new GA.InfoView({
-								container: GA.one("#info"),
-								hideOnStates: [ GA.App.States.HOME, GA.App.States.MAP, GA.App.States.LOGIN, GA.App.States.REGISTER ],
-								templates: {
-									main: $j.trim( GA.one("#info-tpl").innerHTML )
-								}	
 							})
 						]
 					});
@@ -97,19 +93,14 @@
 				
 			})(jQuery.noConflict());
 			
-		</script>	
+		</script>
 		
 	</head>
 	<body>
 		
 		<div class="page">
 			<div id="menu"></div>
-			<div id="search"></div>
-			<div id="map">
-				<div id="next-step" class="yui3-u" title="Next Step"></div>
-				<div id="map-container"></div>
-			</div>
-			<div id="info"></div>
+			<div id="ads"></div>
 		</div>
 		
 		<!-- Templates -->
@@ -121,26 +112,23 @@
 			</div>
 		</script>
 		
-		<!-- Search View -->
-		<script id="search-tpl" type="text/template">
-			<div id="search-btn" class="yui3-u" title="Search for my location"></div>
-			<input id="search-input" class="yui3-u" type="text" placeholder="Where are you?"/>
-		</script>
-		
-		<!-- Info View -->
-		<script id="info-tpl" type="text/template">
-			<div id="previous-step" class="yui3-u" title="Previous Step"></div>
-			<div class="left">
-				<h3>Congrats!</h3>
-				<p>You're almost done adding you business ON THE MAP!</p>
-				<p>Please take on more minute and complete your business information. This is the information the users will see when they're in the neighbourhood.</p>
+		<!-- Ads View -->
+		<script id="ads-tpl" type="text/template">
+			<div id="ads-list" class="yui3-u">
+				{{#ads}}
+					<div id="ad-{{index}}" class="ad {{#selected}}selected{{/selected}}">
+						<div id="ad-info">
+							<div id="name">{{Name}}</div>
+							<div id="description">{{Description}}</div>
+						</div>
+						<div id="buttons">
+							<a id="editBtn-1" class="yui3-u btn btn-primary" href="#">Edit</a>
+							<a id="deleteBtn-1" class="yui3-u btn btn-primary delete" href="#">Delete</a>
+						</div>
+					</div>
+				{{/ads}}
 			</div>
-			<div class="right">
-				<input id="company-name" type="text" maxlength="25" placeholder="Company name (visible to users)"/>
-				<input id="keywords" type="text" maxlength="25" placeholder="Add keywords describing your company (visible to users)"/>
-				<a id="publish" href="#" class="btn btn-large btn-block btn-info">Put me on the map</a>
-			</div>
+			<div id="map"></div>
 		</script>
-		
 	</body>
 </html>

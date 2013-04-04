@@ -53,6 +53,7 @@
 							 */
 							new GA.MenuView({
 								container: GA.one("#menu"),
+								client: "bubu@bubu.com",
 								templates: {
 									main: $j.trim( GA.one("#menu-tpl").innerHTML )
 								}
@@ -135,11 +136,23 @@
 		<!-- Menu View -->
 		<script id="menu-tpl" type="text/template">
 			<div class="menu-container">
-				<div id="home-item" class="yui3-u logo menu-item">GeoAds</div>
-				<div id="login-item" class="yui3-u menu-item">Sign in</div>
-				<div id="register-item" class="yui3-u menu-item">Sign up</div>
-				<div id="publish-item" class="yui3-u menu-item">Publish</div>
-				<div id="about-item" class="yui3-u menu-item">About</div>
+				{{#client}}
+					<div id="home-item" class="yui3-u logo menu-item">
+						<div class="logo client-present">GeoAds</div>
+						<div class="client"> welcomes you, {{client}}</div>
+					</div>
+					<div id="login-item" class="yui3-u menu-item">Sign in</div>
+					<div id="register-item" class="yui3-u menu-item">Sign up</div>
+					<div id="publish-item" class="yui3-u menu-item">Publish</div>
+					<div id="about-item" class="yui3-u menu-item">About</div>
+				{{/client}}
+				{{^client}}
+					<div id="home-item" class="yui3-u logo menu-item">GeoAds</div>
+					<div id="login-item" class="yui3-u menu-item">Sign in</div>
+					<div id="register-item" class="yui3-u menu-item">Sign up</div>
+					<div id="publish-item" class="yui3-u menu-item">Publish</div>
+					<div id="about-item" class="yui3-u menu-item">About</div>
+				{{/client}}
 			</div>
 		</script>
 		

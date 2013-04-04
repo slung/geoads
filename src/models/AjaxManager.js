@@ -12,7 +12,7 @@
 	var ajaxManager = null;
 	var AjaxManager = new Class({
 		
-		geoAdsPlatformUrl: "http://127.0.0.1:1314/",
+		geoAdsPlatformUrl: "http://localhost:1314/",
 		
 		login: function( email, password, success, error )
 		{
@@ -35,6 +35,46 @@
 		    });
 		},
 		
+		register: function( email, password, success, error )
+		{
+			var url = this.geoAdsPlatformUrl + "register";
+			var data = "email=" + email + "&" + "password=" + password;
+			
+			jQuery.ajax({
+		    	url: url,
+		    	type: 'POST',
+		    	data: data,
+		    	success: GA.bind(function( data ){
+		    		if ( data.GreatSuccess == false )
+		    			error.apply( this, [] );
+		    		else
+		    		{
+		    			success.apply( this, [data] );
+		    		}
+		            	
+		    	}, this)
+		    });
+		},
+		
+		getAds: function( success, error )
+		{
+			var url = this.geoAdsPlatformUrl + "ads";
+			
+			jQuery.ajax({
+		    	url: url,
+		    	type: 'POST',
+		    	success: GA.bind(function( data ){
+		    		if ( data.GreatSuccess == false )
+		    			error.apply( this, [] );
+		    		else
+		    		{
+		    			success.apply( this, [GA.JSON.parse(data)] );
+		    		}
+		            	
+		    	}, this)
+		    });
+		},
+		
 		saveAd: function( name, description, radius, lat, lon, success, error )
 		{
 			if ( !name || !description || !radius || !lat || !lon && error)
@@ -43,7 +83,7 @@
 				return;
 			}
 			
-			var url = this.geoAdsPlatformUrl + "/ads/save";
+			var url = this.geoAdsPlatformUrl + "ads/create";
 			var data = "name=" + name + "&" +
 					   "description=" + description + "&" +
 					   "radius=" + radius + "&" +
@@ -64,6 +104,27 @@
 		    	error: GA.bind(function( data ){
 		    		if( error )
 		            	error.apply( this, [] );
+		    	}, this)
+		    });
+		},
+		
+		loadUserAds: function()
+		{
+			var url = this.geoAdsPlatformUrl + "register";
+			var data = "email=" + email + "&" + "password=" + password;
+			
+			jQuery.ajax({
+		    	url: url,
+		    	type: 'POST',
+		    	data: data,
+		    	success: GA.bind(function( data ){
+		    		if ( data.GreatSuccess == false )
+		    			error.apply( this, [] );
+		    		else
+		    		{
+		    			success.apply( this, [data] );
+		    		}
+		            	
 		    	}, this)
 		    });
 		}

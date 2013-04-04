@@ -98,7 +98,8 @@
 			}
 			
 			//Call login system
-			this.ajax.login( this.getEmail(), this.getPassword(), GA.bind(function(){
+			this.ajax.login( this.getEmail(), this.getPassword(), GA.bind(function()
+			{
 				window.location.href = "home";
 			}, this), GA.bind(function(){
 				this.errorMessage = INVALID_LOGIN_ERROR_MSG;
@@ -112,7 +113,7 @@
 		onHomeClick: function( evt )
 		{
 			//Redirect to Home page and change state
-			window.location.href = "home";
+			window.location.href = "ads";
 			this.sendMessage("changeState", { state: GA.App.States.HOME });
 		},
 		

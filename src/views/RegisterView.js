@@ -126,10 +126,16 @@
 				this.render();
 				return;
 			}
-			else
+			
+			this.ajax.register( this.getEmail(), this.getPassword(), GA.bind(function()
 			{
+				window.location.href = "login";
+			}, this), GA.bind(function(){
+				this.render();
 				
-			}
+				GA.addClass( GA.one( EMAIL_INPUT_SELECTOR, this.container ), INPUT_ERROR_CLASS );
+				GA.addClass( GA.one( PASSWORD_INPUT_SELECTOR, this.container ), INPUT_ERROR_CLASS );
+			}, this) );
 		},
 		
 		onHomeClick: function( evt )

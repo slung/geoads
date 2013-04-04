@@ -21,6 +21,28 @@
 				throw new Error('You can only create one instance of DataManager!');
 			
 			this._parent();
+			
+			this.ajax = GA.AjaxManager.getInstance();
+		},
+		
+		loadUserAds: function()
+		{
+			this.ajax.getAds( GA.bind(function( data ){
+				
+				if ( !data || data.length == 0 )
+				{
+					this.fire('adsLoadedFail');
+					return;
+				}
+				
+				for ( var i = 0; i < data.length; i++ )
+					data[i].index = i;
+				
+				this.fire('adsLoaded', data);
+				
+			}, this), function(){
+				
+			} );
 		},
 		
 		geocode: function( address, multipleResults, options )

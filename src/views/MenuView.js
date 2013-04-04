@@ -18,6 +18,8 @@
 			
 			// Call super
 			this._parent( cfg );
+			
+			this.client = cfg.client;
 		},
 		
 		register: function()
@@ -27,7 +29,9 @@
 		
 		render: function()
 		{
-			this.container.innerHTML = this.mustache( this.templates.main, {});
+			this.container.innerHTML = this.mustache( this.templates.main, {
+				client: this.client
+			});
 			
 			return this;
 		},
@@ -69,20 +73,10 @@
 			{
 				case "home-item":
 				{
+					window.location.href = "home";
 					this.sendMessage("changeState", {
 						state: GA.App.States.HOME
 					});
-					
-					break;
-				}
-				
-				case "publish-item":
-				{
-					this.sendMessage("changeState", {
-						state: GA.App.States.MAP
-					});
-					
-					this.sendMessage("resizeMap");
 					
 					break;
 				}
@@ -103,6 +97,20 @@
 					this.sendMessage("changeState", {
 						state: GA.App.States.REGISTER
 					});
+					
+					break;
+				}
+				
+				case "my-ads-item":
+				{
+					window.location.href = "/ads";
+					
+					break;
+				}
+				
+				case "new-ad-item":
+				{
+					window.location.href = "ads/create";
 					
 					break;
 				}

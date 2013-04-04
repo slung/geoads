@@ -120,6 +120,28 @@
 				throw new Error('You can only create one instance of DataManager!');
 			
 			this._parent();
+			
+			this.ajax = GA.AjaxManager.getInstance();
+		},
+		
+		loadUserAds: function()
+		{
+			this.ajax.getAds( GA.bind(function( data ){
+				
+				if ( !data || data.length == 0 )
+				{
+					this.fire('adsLoadedFail');
+					return;
+				}
+				
+				for ( var i = 0; i < data.length; i++ )
+					data[i].index = i;
+				
+				this.fire('adsLoaded', data);
+				
+			}, this), function(){
+				
+			} );
 		},
 		
 		geocode: function( address, multipleResults, options )
@@ -268,7 +290,7 @@
 	var ajaxManager = null;
 	var AjaxManager = new Class({
 		
-		geoAdsPlatformUrl: "http://127.0.0.1:1314/",
+		geoAdsPlatformUrl: "http://localhost:1314/",
 		
 		login: function( email, password, success, error )
 		{
@@ -291,6 +313,46 @@
 		    });
 		},
 		
+		register: function( email, password, success, error )
+		{
+			var url = this.geoAdsPlatformUrl + "register";
+			var data = "email=" + email + "&" + "password=" + password;
+			
+			jQuery.ajax({
+		    	url: url,
+		    	type: 'POST',
+		    	data: data,
+		    	success: GA.bind(function( data ){
+		    		if ( data.GreatSuccess == false )
+		    			error.apply( this, [] );
+		    		else
+		    		{
+		    			success.apply( this, [data] );
+		    		}
+		            	
+		    	}, this)
+		    });
+		},
+		
+		getAds: function( success, error )
+		{
+			var url = this.geoAdsPlatformUrl + "ads";
+			
+			jQuery.ajax({
+		    	url: url,
+		    	type: 'POST',
+		    	success: GA.bind(function( data ){
+		    		if ( data.GreatSuccess == false )
+		    			error.apply( this, [] );
+		    		else
+		    		{
+		    			success.apply( this, [GA.JSON.parse(data)] );
+		    		}
+		            	
+		    	}, this)
+		    });
+		},
+		
 		saveAd: function( name, description, radius, lat, lon, success, error )
 		{
 			if ( !name || !description || !radius || !lat || !lon && error)
@@ -299,7 +361,7 @@
 				return;
 			}
 			
-			var url = this.geoAdsPlatformUrl + "/ads/save";
+			var url = this.geoAdsPlatformUrl + "ads/create";
 			var data = "name=" + name + "&" +
 					   "description=" + description + "&" +
 					   "radius=" + radius + "&" +
@@ -320,6 +382,27 @@
 		    	error: GA.bind(function( data ){
 		    		if( error )
 		            	error.apply( this, [] );
+		    	}, this)
+		    });
+		},
+		
+		loadUserAds: function()
+		{
+			var url = this.geoAdsPlatformUrl + "register";
+			var data = "email=" + email + "&" + "password=" + password;
+			
+			jQuery.ajax({
+		    	url: url,
+		    	type: 'POST',
+		    	data: data,
+		    	success: GA.bind(function( data ){
+		    		if ( data.GreatSuccess == false )
+		    			error.apply( this, [] );
+		    		else
+		    		{
+		    			success.apply( this, [data] );
+		    		}
+		            	
 		    	}, this)
 		    });
 		}
@@ -381,9 +464,9 @@
 				return;
 				
 			this.ajax.saveAd( this.ad.name, this.ad.description, this.ad.radius, this.ad.center.lat, this.ad.center.lon, function(){
-				alert("Save ad Success!");
+				window.location.href = "ads";
 			}, function(){
-				alert("Save ad Fail!")
+				window.location.href = "home";
 			} );
 		}
 	});	
@@ -771,6 +854,8 @@
 			
 			// Call super
 			this._parent( cfg );
+			
+			this.client = cfg.client;
 		},
 		
 		register: function()
@@ -780,7 +865,9 @@
 		
 		render: function()
 		{
-			this.container.innerHTML = this.mustache( this.templates.main, {});
+			this.container.innerHTML = this.mustache( this.templates.main, {
+				client: this.client
+			});
 			
 			return this;
 		},
@@ -822,20 +909,10 @@
 			{
 				case "home-item":
 				{
+					window.location.href = "home";
 					this.sendMessage("changeState", {
 						state: GA.App.States.HOME
 					});
-					
-					break;
-				}
-				
-				case "publish-item":
-				{
-					this.sendMessage("changeState", {
-						state: GA.App.States.MAP
-					});
-					
-					this.sendMessage("resizeMap");
 					
 					break;
 				}
@@ -856,6 +933,20 @@
 					this.sendMessage("changeState", {
 						state: GA.App.States.REGISTER
 					});
+					
+					break;
+				}
+				
+				case "my-ads-item":
+				{
+					window.location.href = "/ads";
+					
+					break;
+				}
+				
+				case "new-ad-item":
+				{
+					window.location.href = "ads/create";
 					
 					break;
 				}
@@ -1151,7 +1242,8 @@
 			}
 			
 			//Call login system
-			this.ajax.login( this.getEmail(), this.getPassword(), GA.bind(function(){
+			this.ajax.login( this.getEmail(), this.getPassword(), GA.bind(function()
+			{
 				window.location.href = "home";
 			}, this), GA.bind(function(){
 				this.errorMessage = INVALID_LOGIN_ERROR_MSG;
@@ -1165,7 +1257,7 @@
 		onHomeClick: function( evt )
 		{
 			//Redirect to Home page and change state
-			window.location.href = "home";
+			window.location.href = "ads";
 			this.sendMessage("changeState", { state: GA.App.States.HOME });
 		},
 		
@@ -1311,10 +1403,16 @@
 				this.render();
 				return;
 			}
-			else
+			
+			this.ajax.register( this.getEmail(), this.getPassword(), GA.bind(function()
 			{
+				window.location.href = "login";
+			}, this), GA.bind(function(){
+				this.render();
 				
-			}
+				GA.addClass( GA.one( EMAIL_INPUT_SELECTOR, this.container ), INPUT_ERROR_CLASS );
+				GA.addClass( GA.one( PASSWORD_INPUT_SELECTOR, this.container ), INPUT_ERROR_CLASS );
+			}, this) );
 		},
 		
 		onHomeClick: function( evt )
@@ -1328,6 +1426,77 @@
 	
 	// Publish
 	GA.RegisterView = RegisterView;
+	
+}(GA));
+
+(function( GA )
+{
+	var AdsView = GA.View.extend({
+		
+		events: {
+			".ad":{
+				click: "onAdClick"
+			}
+		},
+		
+		init: function( cfg ) {
+			
+			// Call super
+			this._parent( cfg );
+			
+			//Add event listener for when user ads are loaded
+			this.dataManager.on("adsLoaded", GA.bind( function(data){
+				
+				this.ads = data;
+				this.render();
+				
+			}, this) );
+			
+			this.ads = cfg.ads;
+			
+			//Load user ads
+			//this.dataManager.loadUserAds();
+		},
+		
+		register: function()
+		{
+		},
+		
+		render: function()
+		{
+			if ( !this.ads || this.ads.length == 0)
+				return;
+				
+			this.container.innerHTML = this.mustache( this.templates.main, {
+				ads: this.ads
+			});
+			
+			return this;
+		},
+		
+		selectAd: function( adSelector )
+		{
+			//First remove selected class
+			GA.removeClass(GA.one(".selected", this.container), "selected");
+			
+			//Then add selected class to specified element
+			GA.addClass(GA.one(adSelector, this.container), "selected");
+		},
+		
+		/*
+		 * Events
+		 */
+		onAdClick: function( evt )
+		{
+			var ad = evt.currentTarget.id;
+			var adSelector = "#" + ad;
+			
+			this.selectAd( adSelector );
+		}
+	});
+	
+	// Publish
+	GA.AdsView = AdsView;
 	
 }(GA));
 
