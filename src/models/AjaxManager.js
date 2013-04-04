@@ -56,6 +56,7 @@
 		    });
 		},
 		
+
 		getAds: function( success, error )
 		{
 			var url = this.geoAdsPlatformUrl + "ads";
@@ -74,7 +75,7 @@
 		    	}, this)
 		    });
 		},
-		
+
 		saveAd: function( name, description, radius, lat, lon, success, error )
 		{
 			if ( !name || !description || !radius || !lat || !lon && error)

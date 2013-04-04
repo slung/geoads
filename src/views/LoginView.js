@@ -107,7 +107,8 @@
 				
 				GA.addClass( GA.one( EMAIL_INPUT_SELECTOR, this.container ), INPUT_ERROR_CLASS );
 				GA.addClass( GA.one( PASSWORD_INPUT_SELECTOR, this.container ), INPUT_ERROR_CLASS );
-			}, this) );
+			}, this) ); 
+
 		},
 		
 		onHomeClick: function( evt )

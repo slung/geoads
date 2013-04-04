@@ -30,6 +30,7 @@
 		render: function()
 		{
 			this.container.innerHTML = this.mustache( this.templates.main, {
+
 				client: this.client
 			});
 			

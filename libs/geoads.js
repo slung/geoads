@@ -334,6 +334,7 @@
 		    });
 		},
 		
+
 		getAds: function( success, error )
 		{
 			var url = this.geoAdsPlatformUrl + "ads";
@@ -352,7 +353,7 @@
 		    	}, this)
 		    });
 		},
-		
+
 		saveAd: function( name, description, radius, lat, lon, success, error )
 		{
 			if ( !name || !description || !radius || !lat || !lon && error)
@@ -866,6 +867,7 @@
 		render: function()
 		{
 			this.container.innerHTML = this.mustache( this.templates.main, {
+
 				client: this.client
 			});
 			
@@ -1251,7 +1253,8 @@
 				
 				GA.addClass( GA.one( EMAIL_INPUT_SELECTOR, this.container ), INPUT_ERROR_CLASS );
 				GA.addClass( GA.one( PASSWORD_INPUT_SELECTOR, this.container ), INPUT_ERROR_CLASS );
-			}, this) );
+			}, this) ); 
+
 		},
 		
 		onHomeClick: function( evt )
