@@ -5,6 +5,9 @@
 		events: {
 			".ad":{
 				click: "onAdClick"
+			},
+			"#buttons .delete":{
+				click: "onDeleteAdClick"
 			}
 		},
 		
@@ -12,6 +15,11 @@
 			
 			// Call super
 			this._parent( cfg );
+			
+			this.onReady = cfg.onReady;
+			
+			if ( this.onReady )
+				GA.bind( this.onReady, this );
 			
 			//Add event listener for when user ads are loaded
 			this.dataManager.on("adsLoaded", GA.bind( function(data){
@@ -23,6 +31,8 @@
 			
 			//Load user ads
 			this.dataManager.loadUserAds();
+			
+			//this.ads = cfg.ads;
 		},
 		
 		register: function()
@@ -35,7 +45,6 @@
 		{
 			if ( !this.ads || this.ads.length == 0)
 			{
-				
 				//Change container size
 				jQuery("#" + this.container.id).css("width", "100%");
 				
@@ -46,11 +55,17 @@
 				return this;
 			}
 			
+			//Change container size
+				jQuery("#" + this.container.id).css("width", 370);
+			
 			this.sendMessage("changeState", { state: GA.App.States.MAP });
 			
 			this.container.innerHTML = this.mustache( this.templates.main, {
 				ads: this.ads
 			});
+			
+			if (this.onReady)
+				this.onReady();
 			
 			return this;
 		},
@@ -83,6 +98,38 @@
 			this.sendMessage("drawMarker", adInfo);
 		},
 		
+		deleteAd: function( adObject )
+		{
+			if ( !adObject )
+				return;
+			
+			var adSelector = "#ad-" + adObject.index;
+			
+			//Visually remove Ad
+			jQuery(adSelector).fadeOut('slow', GA.bind(function(){
+				
+				this.adManager.deleteAd(adObject.InternalId);
+				
+				//Remove from Ads array
+				this.ads.splice( adObject.index, 1 );
+				
+				//Synchronize internal Index fro Ads
+				if ( this.ads.length > 0 )
+					for ( var i = 0; i < this.ads.length; i++ )
+						this.ads[i].index = i;
+				
+				//Re-render view
+				this.render();
+				
+				if ( this.ads.length > 0 )
+				{
+					var nextAdIndex = this.ads[0].index;
+					this.selectAd("#ad-" + nextAdIndex, 0);
+				}
+				
+			}, this));
+		},
+		
 		/*
 		 * Messages
 		 */
@@ -113,6 +160,16 @@
 			var adIndex = adId.split('-')[1];
 			
 			this.selectAd( adSelector, adIndex );
+		},
+		
+		onDeleteAdClick: function( evt )
+		{
+			var adId = evt.currentTarget.id;
+			var adIndex = adId.split('-')[1];
+			
+			var adObject = this.ads[adIndex];
+			
+			this.deleteAd( adObject );
 		}
 	});
 	

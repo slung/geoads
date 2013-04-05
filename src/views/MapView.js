@@ -24,7 +24,7 @@
 			this.dataManager.on('userGeocoded', GA.bind( this.onUserGeocoded, this));
 			this.dataManager.on('userNotGeocoded', GA.bind( this.onUserNotGeocoded, this));
 			this.markerIconUrl = cfg.markerIconUrl || "images/grey-blue-pin-48.png";
-			
+			this.alwaysRefreshMarker = cfg.alwaysRefreshMarker;
 			
 			this.markerInfo = cfg.markerInfo || {
 				url: this.markerIconUrl,
@@ -137,6 +137,12 @@
 		
 		createMarker: function( markerInfo )
 		{
+			if ( this.marker )
+			{
+				this.marker.setMap(null);
+				this.marker = null;				
+			}
+			
 			this.marker = new google.maps.Marker({
 				map: this.map,
 				animation: google.maps.Animation.DROP,
@@ -150,8 +156,14 @@
 		{
 			var center = this.marker.getPosition();
 			
-			if ( !this.adCoverage )
+			if ( !this.adCoverage || this.alwaysRefreshMarker )
 			{
+				if ( this.adCoverage )
+				{
+					this.adCoverage.setMap(null);
+					this.adCoverage = null;				
+				}
+				
 				this.adCoverage = new google.maps.Circle({
 					editable: this.editableElements,
 					center: center,
@@ -162,6 +174,9 @@
 				    fillColor: "#00A4E4",
 				    fillOpacity: 0.3	
 				});
+				
+				//Adjust map bounds in order to always see entire Ad coverage
+				this.map.fitBounds(this.adCoverage.getBounds());
 			}
 			else
 			{
@@ -176,6 +191,9 @@
 					
 					//@ToDO: Should show a message to the user when maxRadius is reached!!!
 				}
+				
+				//Adjust map bounds in order to always see entire Ad coverage
+				this.map.fitBounds(this.adCoverage.getBounds());
 				
 			}, this));
 			
@@ -219,6 +237,7 @@
 			markerInfo.position = {};
 			markerInfo.position.lat = msg.lat;
 			markerInfo.position.lng = msg.lon;
+			markerInfo.radius = msg.radius || this.defaultRadius;
 			
 			this.drawMarker( markerInfo );
 		},

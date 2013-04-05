@@ -130,13 +130,15 @@ body
 {
 	position: absolute;
 	top: 50px;
+	bottom: 0;
 	
 	font-family: 'Lato', sans-serif;
 	
 	width: 370px;
-	height: 600px;
 	overflow-x: hidden;
 	overflow-y: auto;
+	
+	outline: none;
 }
 
 .ads-page #ads #ads-container
@@ -210,11 +212,14 @@ body
 .ads-page #map
 {
 	position: absolute;
-	top: 80px;
-	left: 400px;
+	top: 50px;
+	left: 375px;
+	right: 0;
+	bottom: 0;
 	
-	width: 600px;
-	height: 600px;
+	-webkit-box-shadow: -2px -3px 31px -6px black;
+   	-moz-box-shadow: -2px -3px 31px -6px black;
+    box-shadow: -2px -3px 31px -6px black;
 }
 
 /*
@@ -483,6 +488,19 @@ body
 	opacity: 1;
 }
 
-/*
- * Footer
- */
+/*Scroll bar*/
+
+.jspTrack
+{
+	background: white;
+	border: none;
+}
+
+.jspDrag
+{
+	background: #00A4E4;
+	width: 3px;
+	border-radius: 2px;
+	border: none;
+	outline: none;
+}

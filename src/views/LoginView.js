@@ -26,6 +26,9 @@
 			},
 			"#registerBtn":{
 				click: "onRegisterClick"
+			},
+			"#login-pass": {
+				keyup: "onKeyUp"
 			}
 		},
 		
@@ -45,7 +48,14 @@
 				errorMessage: this.errorMessage
 			});
 			
+			this.focus();
+			
 			return this;
+		},
+		
+		focus: function()
+		{
+			GA.one(EMAIL_INPUT_SELECTOR, this.container).focus();
 		},
 		
 		getEmail: function()
@@ -66,6 +76,12 @@
 		/*
 		 * Events
 		 */
+		
+		onKeyUp: function( evt )
+		{
+			if( evt.keyCode == 13)
+				this.onLoginSubmitClick();
+		},
 		
 		onLoginSubmitClick: function( evt )
 		{

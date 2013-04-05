@@ -7,11 +7,12 @@
 		<link rel="icon" href="images/favicon.ico" />
 		
 		<!-- Style -->
-		<link rel="stylesheet" type="text/css" href="style/main.css">
-	    <link rel="stylesheet" type="text/css" href="style/grids-min.css">
-	    <link rel="stylesheet" type="text/css" href="style/cssreset-min.css">
-	    <link rel="stylesheet" type="text/css" href="style/bootstrap.css">
-	    <link rel="stylesheet" type="text/css" href="style/flat-ui.css">
+		<link rel="stylesheet" type="text/css" href="libs/scroller/jscrollpane.css" />
+	    <link rel="stylesheet" type="text/css" href="style/grids-min.css"/>
+	    <link rel="stylesheet" type="text/css" href="style/cssreset-min.css"/>
+	    <link rel="stylesheet" type="text/css" href="style/bootstrap.css"/>
+	    <link rel="stylesheet" type="text/css" href="style/flat-ui.css"/>
+	    <link rel="stylesheet" type="text/css" href="style/main.css"/>
 	    
 	    <!-- Google Maps -->
     	<script type="text/javascript" src="http://maps.google.com/maps/api/js?v=3.3&sensor=false&language=en"></script>
@@ -24,6 +25,12 @@
 		<script type="text/javascript" src="libs/mustache.js"></script>
 		<script type="text/javascript" src="libs/jsonp.js"></script>
 		<script type="text/javascript" src="libs/geoads.helpers.js"></script>
+	    
+	    <!-- Add mousewheel plugin (this is optional) -->
+		<script type="text/javascript" src="libs/scroller/jquery.mousewheel-3.0.6.pack.js"></script>
+	
+		<!-- Add scroll panel -->
+		<script type="text/javascript" src="libs/scroller/jquery.jscrollpane.min.js"></script>
 	    
 		<!-- Font -->
 	    <link href='http://fonts.googleapis.com/css?family=Alfa+Slab+One' rel='stylesheet' type='text/css'>
@@ -47,6 +54,34 @@
 						Radius: 200
 			},{
 						index: 2,
+						Name: "Third Ad",
+						Description: "Thirs Ad Description",
+						Lat: 55.7555389404297,
+						Lon: 26.2374992370605,
+						Radius: 700
+			},{
+						index: 3,
+						Name: "Third Ad",
+						Description: "Thirs Ad Description",
+						Lat: 55.7555389404297,
+						Lon: 26.2374992370605,
+						Radius: 700
+			},{
+						index: 4,
+						Name: "Third Ad",
+						Description: "Thirs Ad Description",
+						Lat: 55.7555389404297,
+						Lon: 26.2374992370605,
+						Radius: 700
+			},{
+						index: 5,
+						Name: "Third Ad",
+						Description: "Thirs Ad Description",
+						Lat: 55.7555389404297,
+						Lon: 26.2374992370605,
+						Radius: 700
+			},{
+						index: 6,
 						Name: "Third Ad",
 						Description: "Thirs Ad Description",
 						Lat: 55.7555389404297,
@@ -76,10 +111,14 @@
 							 */
 							new GA.AdsView({
 								container: GA.one("#ads"),
-								//ads: ads,
+								ads: ads,
 								templates: {
 									main: $j.trim( GA.one("#ads-tpl").innerHTML ),
 									noAds: $j.trim( GA.one("#no-ads-tpl").innerHTML ) 
+								},
+								onReady: function()
+								{
+									$j(".ads-page #ads").jScrollPane();
 								}
 							}),
 							/*
@@ -131,14 +170,14 @@
 		<script id="ads-tpl" type="text/template">
 			<div id="ads-container">
 				{{#ads}}
-					<div id="ad-{{index}}" class="ad">
+					<div id="ad-{{index}}" class="ad id-{{InternalId}}">
 						<div id="ad-info">
 							<div id="name">{{Name}}</div>
 							<div id="description">{{Description}}</div>
 						</div>
 						<div id="buttons">
-							<a id="editBtn-1" class="yui3-u btn btn-primary" href="#">Edit</a>
-							<a id="deleteBtn-1" class="yui3-u btn btn-primary delete" href="#">Delete</a>
+							<a id="editBtn-{{index}}" class="id-{{InternalId}} yui3-u btn btn-primary edit" href="#">Edit</a>
+							<a id="deleteBtn-{{index}}" class="id-{{InternalId}} yui3-u btn btn-primary delete" href="#">Delete</a>
 						</div>
 					</div>
 				{{/ads}}

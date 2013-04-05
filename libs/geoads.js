@@ -362,6 +362,9 @@
 				return;
 			}
 			
+			name = name.replace(/&/g, "amp;");
+			description = description.replace(/&/g, "amp;");
+			
 			var url = this.geoAdsPlatformUrl + "ads/create";
 			var data = "name=" + name + "&" +
 					   "description=" + description + "&" +
@@ -406,7 +409,22 @@
 		            	
 		    	}, this)
 		    });
-		}
+		},
+		
+		deleteAd: function( id )
+		{
+			if ( id == undefined )
+				return;
+			
+			var url = this.geoAdsPlatformUrl + "ads/delete";
+			var data = "id=" + id;
+			
+			jQuery.ajax({
+		    	url: url,
+		    	type: 'POST',
+		    	data: data
+		    });
+		},
 	});
 	
 	AjaxManager.getInstance = function()
@@ -469,6 +487,14 @@
 			}, function(){
 				window.location.href = "home";
 			} );
+		},
+		
+		deleteAd: function( adId )
+		{
+			if ( adId == undefined )
+				return;
+				
+			this.ajax.deleteAd( adId );
 		}
 	});	
 
@@ -608,7 +634,7 @@
 			this.dataManager.on('userGeocoded', GA.bind( this.onUserGeocoded, this));
 			this.dataManager.on('userNotGeocoded', GA.bind( this.onUserNotGeocoded, this));
 			this.markerIconUrl = cfg.markerIconUrl || "images/grey-blue-pin-48.png";
-			
+			this.alwaysRefreshMarker = cfg.alwaysRefreshMarker;
 			
 			this.markerInfo = cfg.markerInfo || {
 				url: this.markerIconUrl,
@@ -721,6 +747,12 @@
 		
 		createMarker: function( markerInfo )
 		{
+			if ( this.marker )
+			{
+				this.marker.setMap(null);
+				this.marker = null;				
+			}
+			
 			this.marker = new google.maps.Marker({
 				map: this.map,
 				animation: google.maps.Animation.DROP,
@@ -734,8 +766,14 @@
 		{
 			var center = this.marker.getPosition();
 			
-			if ( !this.adCoverage )
+			if ( !this.adCoverage || this.alwaysRefreshMarker )
 			{
+				if ( this.adCoverage )
+				{
+					this.adCoverage.setMap(null);
+					this.adCoverage = null;				
+				}
+				
 				this.adCoverage = new google.maps.Circle({
 					editable: this.editableElements,
 					center: center,
@@ -746,6 +784,9 @@
 				    fillColor: "#00A4E4",
 				    fillOpacity: 0.3	
 				});
+				
+				//Adjust map bounds in order to always see entire Ad coverage
+				this.map.fitBounds(this.adCoverage.getBounds());
 			}
 			else
 			{
@@ -760,6 +801,9 @@
 					
 					//@ToDO: Should show a message to the user when maxRadius is reached!!!
 				}
+				
+				//Adjust map bounds in order to always see entire Ad coverage
+				this.map.fitBounds(this.adCoverage.getBounds());
 				
 			}, this));
 			
@@ -803,6 +847,7 @@
 			markerInfo.position = {};
 			markerInfo.position.lat = msg.lat;
 			markerInfo.position.lng = msg.lon;
+			markerInfo.radius = msg.radius || this.defaultRadius;
 			
 			this.drawMarker( markerInfo );
 		},
@@ -1021,6 +1066,11 @@
 			return this;
 		},
 		
+		focus: function()
+		{
+			GA.one(INPUT_SELECTOR, this.container).focus();
+		},
+		
 		search: function( value, multipleResults )
 		{
 			this.searchInputText = value || this.getInputValue();
@@ -1195,6 +1245,9 @@
 			},
 			"#registerBtn":{
 				click: "onRegisterClick"
+			},
+			"#login-pass": {
+				keyup: "onKeyUp"
 			}
 		},
 		
@@ -1214,7 +1267,14 @@
 				errorMessage: this.errorMessage
 			});
 			
+			this.focus();
+			
 			return this;
+		},
+		
+		focus: function()
+		{
+			GA.one(EMAIL_INPUT_SELECTOR, this.container).focus();
 		},
 		
 		getEmail: function()
@@ -1235,6 +1295,12 @@
 		/*
 		 * Events
 		 */
+		
+		onKeyUp: function( evt )
+		{
+			if( evt.keyCode == 13)
+				this.onLoginSubmitClick();
+		},
 		
 		onLoginSubmitClick: function( evt )
 		{
@@ -1325,6 +1391,9 @@
 			},
 			".login-icon":{
 				click: "onHomeClick"
+			},
+			"#register-pass-confirm": {
+				keyup: "onKeyUp"
 			}
 		},
 		
@@ -1344,7 +1413,14 @@
 				errorMessage: this.errorMessage
 			});
 			
+			this.focus();
+			
 			return this;
+		},
+		
+		focus: function()
+		{
+			GA.one(EMAIL_INPUT_SELECTOR, this.container).focus();
 		},
 		
 		getEmail: function()
@@ -1381,6 +1457,12 @@
 		/*
 		 * Events
 		 */
+		
+		onKeyUp: function( evt )
+		{
+			if( evt.keyCode == 13)
+				this.onRegisterSubmitClick();
+		},
 		
 		onRegisterSubmitClick: function( evt )
 		{
@@ -1462,6 +1544,9 @@
 		events: {
 			".ad":{
 				click: "onAdClick"
+			},
+			"#buttons .delete":{
+				click: "onDeleteAdClick"
 			}
 		},
 		
@@ -1469,6 +1554,11 @@
 			
 			// Call super
 			this._parent( cfg );
+			
+			this.onReady = cfg.onReady;
+			
+			if ( this.onReady )
+				GA.bind( this.onReady, this );
 			
 			//Add event listener for when user ads are loaded
 			this.dataManager.on("adsLoaded", GA.bind( function(data){
@@ -1480,6 +1570,8 @@
 			
 			//Load user ads
 			this.dataManager.loadUserAds();
+			
+			//this.ads = cfg.ads;
 		},
 		
 		register: function()
@@ -1492,7 +1584,6 @@
 		{
 			if ( !this.ads || this.ads.length == 0)
 			{
-				
 				//Change container size
 				jQuery("#" + this.container.id).css("width", "100%");
 				
@@ -1503,11 +1594,17 @@
 				return this;
 			}
 			
+			//Change container size
+				jQuery("#" + this.container.id).css("width", 370);
+			
 			this.sendMessage("changeState", { state: GA.App.States.MAP });
 			
 			this.container.innerHTML = this.mustache( this.templates.main, {
 				ads: this.ads
 			});
+			
+			if (this.onReady)
+				this.onReady();
 			
 			return this;
 		},
@@ -1540,6 +1637,38 @@
 			this.sendMessage("drawMarker", adInfo);
 		},
 		
+		deleteAd: function( adObject )
+		{
+			if ( !adObject )
+				return;
+			
+			var adSelector = "#ad-" + adObject.index;
+			
+			//Visually remove Ad
+			jQuery(adSelector).fadeOut('slow', GA.bind(function(){
+				
+				this.adManager.deleteAd(adObject.InternalId);
+				
+				//Remove from Ads array
+				this.ads.splice( adObject.index, 1 );
+				
+				//Synchronize internal Index fro Ads
+				if ( this.ads.length > 0 )
+					for ( var i = 0; i < this.ads.length; i++ )
+						this.ads[i].index = i;
+				
+				//Re-render view
+				this.render();
+				
+				if ( this.ads.length > 0 )
+				{
+					var nextAdIndex = this.ads[0].index;
+					this.selectAd("#ad-" + nextAdIndex, 0);
+				}
+				
+			}, this));
+		},
+		
 		/*
 		 * Messages
 		 */
@@ -1570,6 +1699,16 @@
 			var adIndex = adId.split('-')[1];
 			
 			this.selectAd( adSelector, adIndex );
+		},
+		
+		onDeleteAdClick: function( evt )
+		{
+			var adId = evt.currentTarget.id;
+			var adIndex = adId.split('-')[1];
+			
+			var adObject = this.ads[adIndex];
+			
+			this.deleteAd( adObject );
 		}
 	});
 	

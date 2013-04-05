@@ -43,6 +43,14 @@
 			}, function(){
 				window.location.href = "home";
 			} );
+		},
+		
+		deleteAd: function( adId )
+		{
+			if ( adId == undefined )
+				return;
+				
+			this.ajax.deleteAd( adId );
 		}
 	});	
 

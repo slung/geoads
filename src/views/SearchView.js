@@ -34,6 +34,11 @@
 			return this;
 		},
 		
+		focus: function()
+		{
+			GA.one(INPUT_SELECTOR, this.container).focus();
+		},
+		
 		search: function( value, multipleResults )
 		{
 			this.searchInputText = value || this.getInputValue();

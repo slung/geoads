@@ -84,6 +84,9 @@
 				return;
 			}
 			
+			name = name.replace(/&/g, "amp;");
+			description = description.replace(/&/g, "amp;");
+			
 			var url = this.geoAdsPlatformUrl + "ads/create";
 			var data = "name=" + name + "&" +
 					   "description=" + description + "&" +
@@ -128,7 +131,22 @@
 		            	
 		    	}, this)
 		    });
-		}
+		},
+		
+		deleteAd: function( id )
+		{
+			if ( id == undefined )
+				return;
+			
+			var url = this.geoAdsPlatformUrl + "ads/delete";
+			var data = "id=" + id;
+			
+			jQuery.ajax({
+		    	url: url,
+		    	type: 'POST',
+		    	data: data
+		    });
+		},
 	});
 	
 	AjaxManager.getInstance = function()
